@@ -1,40 +1,109 @@
 # 📝 Decision Log
 
-> **Purpose**: Record every significant product and engineering decision with context and rationale.  
-> **When to update**: Whenever a decision is made that affects architecture, product direction, tooling, or scope.  
-> **Why it matters**: Prevents re-litigating settled decisions. Helps judges understand our thought process.
+> **Purpose**: Record every significant product and engineering decision with context and rationale.
+> **When to update**: Whenever a decision is made that affects architecture, product direction, tooling, or scope.
 
 ---
 
-## How to Use This Log
-
-When making a decision, append a new entry using the template below. Decisions are numbered sequentially and ordered newest-first for easy reference.
-
-### Entry Template
-
-```markdown
-### DEC-XXX: [Decision Title]
+### DEC-010: Scope Freeze
 
 | Field | Value |
 |---|---|
-| **Date** | YYYY-MM-DD |
-| **Category** | Architecture / Product / Tooling / Design / Process |
-| **Status** | Decided / Revisiting / Superseded by DEC-XXX |
+| **Date** | 2026-08-07 |
+| **Category** | Process |
+| **Status** | Decided |
 
-**Decision**: What was decided.
+**Decision**: Freeze scope at v3.1. No new features will be added. Only build, polish, and demo from this point.
 
-**Reason**: Why this decision was made.
-
-**Alternatives Considered**:
-1. Alternative A — why rejected
-2. Alternative B — why rejected
-
-**Impact**: What this affects (files, components, workflow, timeline).
-```
+**Reason**: Every additional feature carries more risk than reward. The plan is comprehensive enough to win. Execution quality > feature quantity.
 
 ---
 
-## Decision Log
+### DEC-009: Delete Latest Signal Card
+
+| Field | Value |
+|---|---|
+| **Date** | 2026-08-07 |
+| **Category** | Design |
+| **Status** | Decided |
+
+**Decision**: Remove the Latest Signal card from the interview sidebar. Activity Feed covers the same information.
+
+**Reason**: Reduces sidebar clutter. The Activity Feed already shows signal details (✓ Domain separation, ✗ Missing monitoring). No information loss.
+
+---
+
+### DEC-008: Progressive Disclosure UI
+
+| Field | Value |
+|---|---|
+| **Date** | 2026-08-07 |
+| **Category** | Design |
+| **Status** | Decided |
+
+**Decision**: Interview screen starts with only Theory + Radar + Module Health. Strategy, Activity Feed, and Interview Map animate in after the first answer. Theory Evolution appears after the second answer.
+
+**Reason**: Reduces initial cognitive load. Makes the interface feel like it's learning alongside the AI. Creates a "growing intelligence" narrative that judges experience firsthand.
+
+---
+
+### DEC-007: Instant Interview Start (No Forced Loading)
+
+| Field | Value |
+|---|---|
+| **Date** | 2026-08-07 |
+| **Category** | Design |
+| **Status** | Decided |
+
+**Decision**: Interview screen appears instantly. Processing steps show in the sidebar while the first question loads.
+
+**Reason**: Forced 3-second loading screens feel fake. Sidebar processing (Building Theory → Loading Missions → Selecting Strategy) shows real pipeline steps and makes the system feel alive.
+
+**Alternative Rejected**: 3-second cinematic loading animation — rejected because judges hate fake waiting.
+
+---
+
+### DEC-006: Interview Length — 5 Questions
+
+| Field | Value |
+|---|---|
+| **Date** | 2026-08-07 |
+| **Category** | Product |
+| **Status** | Decided |
+
+**Decision**: 5 rounds × 1 question each + optional follow-up = 5–6 questions total.
+
+**Reason**: Judges won't sit through 8-10 questions. 5 is enough to build a rich Theory while respecting judge patience. Each round has a distinct purpose (Background → Core AI → Applied → Production → Synthesis).
+
+**Alternative Rejected**: 8-10 questions across 5 rounds — rejected as too long for demo and judge evaluation.
+
+---
+
+### DEC-005: Rename Digital Twin → Candidate Theory
+
+| Field | Value |
+|---|---|
+| **Date** | 2026-08-07 |
+| **Category** | Product |
+| **Status** | Decided |
+
+**Decision**: The candidate model is called "Candidate Theory" (not "Digital Twin"). The sidebar is "Live Theory."
+
+**Reason**: "Digital Twin" is becoming generic (IoT/manufacturing connotation). "Candidate Theory" implies hypothesis-driven assessment — the system builds a theory and tests it. More memorable, more unique, more aligned with the product narrative.
+
+---
+
+### DEC-004: Product Idea — Intervu AI
+
+| Field | Value |
+|---|---|
+| **Date** | 2026-08-07 |
+| **Category** | Product |
+| **Status** | Decided |
+
+**Decision**: Build an AI interview agent that constructs a Candidate Theory from cohort data, conducts hypothesis-driven interviews, and produces an Engineering Intelligence Report.
+
+**Reason**: The hackathon challenge requires an AI interview agent. This approach differentiates by making the intelligence visible (live theory, strategy panel, decision trace, evidence chains) and by separating deterministic logic from LLM calls.
 
 ---
 
@@ -48,13 +117,7 @@ When making a decision, append a new entry using the template below. Decisions a
 
 **Decision**: Create all project documentation and structure before writing any application code.
 
-**Reason**: A hackathon's biggest risk is disorganization. By establishing documentation, task tracking, and AI logging upfront, every subsequent task is faster and more focused. This also directly addresses the "AI Steering" judging criteria.
-
-**Alternatives Considered**:
-1. Start coding immediately — rejected because it leads to technical debt, unclear direction, and poor documentation.
-2. Minimal docs + code in parallel — rejected because documentation tends to be skipped under time pressure.
-
-**Impact**: Adds ~30 minutes upfront but saves hours of confusion later. All future tasks follow a consistent workflow.
+**Reason**: Hackathon's biggest risk is disorganization. Documentation-first ensures clarity and directly addresses the "AI Steering" judging criteria.
 
 ---
 
@@ -68,13 +131,7 @@ When making a decision, append a new entry using the template below. Decisions a
 
 **Decision**: Use TypeScript for all application code.
 
-**Reason**: Type safety catches bugs at compile time, improves IDE support, and demonstrates technical quality to judges. The overhead is minimal with modern tooling.
-
-**Alternatives Considered**:
-1. JavaScript — rejected because lack of types increases bug risk in a fast-paced environment.
-2. Python (backend) — still possible if needed, but TypeScript across the stack reduces context switching.
-
-**Impact**: All source files use `.ts` / `.tsx` extensions. `tsconfig.json` will be configured with strict mode.
+**Reason**: Type safety catches bugs at compile time, improves IDE support, and demonstrates technical quality to judges.
 
 ---
 
@@ -86,16 +143,10 @@ When making a decision, append a new entry using the template below. Decisions a
 | **Category** | Architecture |
 | **Status** | Decided |
 
-**Decision**: Organize the project with a structured folder hierarchy: `docs/`, `prompts/`, `memory/`, `assets/`, and eventually `src/`.
+**Decision**: Organize the project with `docs/`, `prompts/`, `memory/`, `assets/`, and `src/`.
 
-**Reason**: Clear separation of concerns between documentation, AI interactions, and application code. Makes the repo easy to navigate for judges and future AI sessions.
-
-**Alternatives Considered**:
-1. Flat file structure — rejected because it becomes unmanageable quickly.
-2. Monorepo with packages — overkill for a hackathon.
-
-**Impact**: All documentation lives in `docs/`, all AI prompt logs in `prompts/`, all memory-related docs in `memory/`.
+**Reason**: Clear separation of concerns. Easy to navigate for judges and AI sessions.
 
 ---
 
-*Last updated: 2026-08-07T03:54:00+05:30*
+*Last updated: 2026-08-07*

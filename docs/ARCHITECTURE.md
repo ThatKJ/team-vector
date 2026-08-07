@@ -1,40 +1,114 @@
 # 🏗️ Architecture
 
-> **Purpose**: Document the system architecture, component hierarchy, data flow, and deployment strategy.  
-> **When to update**: When new components are added, data flow changes, or infrastructure decisions are made.
+> **Purpose**: Document the system architecture, component hierarchy, data flow, and deployment strategy.
+> **Status**: FINALIZED — Architecture locked for hackathon execution.
 
 ---
 
-## System Architecture Overview
+## System Architecture
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                    CLIENT (Browser)                  │
-│  ┌──────────┐  ┌──────────┐  ┌───────────────────┐  │
-│  │   Pages  │  │Components│  │   State Manager   │  │
-│  └────┬─────┘  └────┬─────┘  └────────┬──────────┘  │
-│       │              │                 │              │
-│       └──────────────┴─────────────────┘              │
-│                      │                                │
-└──────────────────────┼────────────────────────────────┘
-                       │ HTTP / WebSocket
-┌──────────────────────┼────────────────────────────────┐
-│                  API LAYER                             │
-│  ┌──────────┐  ┌──────────┐  ┌───────────────────┐   │
-│  │  Routes  │  │Middleware│  │   Auth Handler    │   │
-│  └────┬─────┘  └────┬─────┘  └────────┬──────────┘   │
-│       │              │                 │               │
-│       └──────────────┴─────────────────┘               │
-│                      │                                 │
-└──────────────────────┼─────────────────────────────────┘
-                       │
-        ┌──────────────┼──────────────┐
-        │              │              │
-   ┌────▼────┐   ┌────▼────┐   ┌────▼────┐
-   │Database │   │ AI API  │   │ Breeth  │
-   │  (TBD)  │   │ (TBD)  │   │ Memory  │
-   └─────────┘   └─────────┘   └─────────┘
+┌──────────────────────────────────────────────────────────────┐
+│                    FRONTEND (Next.js + Tailwind + Framer)     │
+│                                                                │
+│  ┌─────────────┐  ┌──────────────────┐  ┌─────────────────┐  │
+│  │ Start Screen │  │ Interview Screen  │  │ Report Screen   │  │
+│  │              │  │                   │  │                 │  │
+│  │ Candidate    │  │ Chat │ Live Theory│  │ Engineering     │  │
+│  │ Selector +   │  │      │ Strategy   │  │ Intelligence    │  │
+│  │ Module Ready │  │      │ Activity   │  │ Report          │  │
+│  └──────────────┘  └──────────────────┘  └─────────────────┘  │
+│                                                                │
+│  Zustand Store: interview state, theory snapshots, evidence    │
+└────────────────────────────┬───────────────────────────────────┘
+                             │
+                    POST /api/interview
+                             │
+┌────────────────────────────┴───────────────────────────────────┐
+│                    BACKEND (Next.js Route Handler)              │
+│                                                                 │
+│  ┌────────────────┐  ┌────────────────┐  ┌──────────────────┐  │
+│  │ Session        │  │ Interview      │  │ Theory           │  │
+│  │ Manager        │  │ Conductor      │  │ Engine           │  │
+│  │ (Map<id,state>)│  │ (orchestrates) │  │ (deterministic)  │  │
+│  └────────────────┘  └───────┬────────┘  └──────────────────┘  │
+│                              │                                  │
+│  ┌────────────────┐  ┌──────┴─────────┐  ┌──────────────────┐  │
+│  │ Curriculum     │  │ LLM Service    │  │ Candidate        │  │
+│  │ Knowledge      │  │ (Gemini 2.5    │  │ Analyzer         │  │
+│  │ (static JSON)  │  │  Flash)        │  │ (mission parser) │  │
+│  └────────────────┘  └────────────────┘  └──────────────────┘  │
+└─────────────────────────────────────────────────────────────────┘
 ```
+
+---
+
+## Intelligence Pipeline
+
+```
+        Candidate Data
+              │
+              ▼
+    ┌─────────────────────┐
+    │  Candidate Theory   │  ← Deterministic (TypeScript)
+    │      Engine         │
+    └─────────┬───────────┘
+              │
+              ▼
+    ┌─────────────────────┐
+    │  Interview Strategy │  ← Deterministic (TypeScript)
+    └─────────┬───────────┘
+              │
+              ▼
+    ┌─────────────────────┐
+    │  Gemini 2.5 Flash   │  ← LLM (1 of 2 uses)
+    │  Question Generation│
+    └─────────┬───────────┘
+              │
+              ▼
+       Candidate Answer
+              │
+              ▼
+    ┌─────────────────────┐
+    │  Gemini 2.5 Flash   │  ← LLM (2 of 2 uses)
+    │  Answer Evaluation  │
+    └─────────┬───────────┘
+              │
+              ▼
+    ┌─────────────────────┐
+    │  Theory Update      │  ← Deterministic (TypeScript)
+    └─────────┬───────────┘
+              │
+              ▼
+    ┌─────────────────────┐
+    │  Next Strategy      │  ← Deterministic (TypeScript)
+    └─────────┬───────────┘
+              │
+              ▼
+    ┌─────────────────────┐
+    │  Engineering        │
+    │  Intelligence Report│
+    └─────────────────────┘
+```
+
+**Key design decision**: Gemini appears exactly **twice** in the pipeline. The Theory Engine (deterministic TypeScript) controls strategy, scoring, confidence, and report generation. This separation is the core technical differentiator.
+
+---
+
+## Technology Stack
+
+| Layer | Technology | Status |
+|---|---|---|
+| Framework | Next.js (App Router) | ✅ Decided |
+| Language | TypeScript (strict) | ✅ Decided |
+| Styling | Tailwind CSS + Framer Motion | ✅ Decided |
+| Charts | Recharts | ✅ Decided |
+| State | Zustand | ✅ Decided |
+| LLM | Gemini 2.5 Flash | ✅ Decided |
+| Hosting | Vercel | ✅ Decided |
+| Session | In-memory Map | ✅ Decided |
+| Database | None (not needed) | ✅ Decided |
+| Auth | None (spec says no auth) | ✅ Decided |
 
 ---
 
@@ -42,211 +116,152 @@
 
 ```
 team-vector-vicodathon-2026/
-├── docs/                    # Project documentation
-│   ├── AGENT_RULES.md
-│   ├── PROJECT_CONTEXT.md
-│   ├── PRD.md
-│   ├── ARCHITECTURE.md      # ← You are here
-│   ├── TASKS.md
-│   ├── DECISIONS.md
-│   ├── DEMO.md
-│   ├── MEMORY_STRATEGY.md
-│   └── SPONSOR_USAGE.md
-├── prompts/                 # AI usage logs & prompt templates
-│   ├── PROMPTS.md
-│   ├── planning.md
-│   ├── frontend.md
-│   ├── backend.md
-│   ├── review.md
-│   ├── debugging.md
-│   └── deployment.md
-├── memory/                  # Memory layer documentation
-│   ├── schema.md
-│   ├── agents.md
-│   ├── breeth.md
-│   └── memories.md
-├── assets/                  # Static assets
-│   ├── branding/
-│   ├── screenshots/
-│   └── demo/
-├── src/                     # Application source (TBD)
-│   ├── app/                 # Pages / routes
-│   ├── components/          # Reusable UI components
-│   │   ├── ui/              # Primitives (Button, Input, Card)
-│   │   └── features/        # Feature-specific components
-│   ├── lib/                 # Utilities, helpers, constants
-│   ├── hooks/               # Custom React hooks
-│   ├── services/            # API clients, external integrations
-│   ├── types/               # TypeScript type definitions
-│   └── styles/              # Global styles, design tokens
-├── public/                  # Static public assets
-├── .env.local               # Environment variables (gitignored)
+├── docs/                         # Project documentation
+├── prompts/                      # AI usage logs
+├── memory/                       # Memory layer docs
+├── assets/                       # Static assets + hackathon data
+│   ├── candidates.json           # 20 candidate profiles
+│   ├── curriculum.json           # 31-day cohort syllabus
+│   └── technical-spec.md         # API contract (source of truth)
+├── src/                          # Application source
+│   ├── app/                      # Next.js App Router
+│   │   ├── page.tsx              # Start Screen
+│   │   ├── interview/page.tsx    # Interview Screen
+│   │   ├── report/page.tsx       # Report Screen
+│   │   ├── api/interview/route.ts # POST /api/interview
+│   │   └── layout.tsx            # Root layout
+│   ├── components/
+│   │   ├── ui/                   # Primitives (Button, Card, Badge, etc.)
+│   │   ├── interview/            # Interview-specific components
+│   │   ├── theory/               # Theory visualization components
+│   │   └── report/               # Report-specific components
+│   ├── lib/
+│   │   ├── types.ts              # All TypeScript interfaces
+│   │   ├── data/                 # curriculum.json, candidates.json
+│   │   ├── mocks/                # Mock API responses for frontend dev
+│   │   ├── engine/               # Theory Engine, Strategy Engine, etc.
+│   │   ├── gemini/               # LLM service (question gen + evaluation)
+│   │   └── session/              # Session Manager
+│   ├── store/                    # Zustand stores
+│   └── styles/                   # Global styles
+├── public/                       # Static public assets
+├── .env.local                    # API keys (gitignored)
 ├── package.json
+├── tailwind.config.ts
 ├── tsconfig.json
 └── README.md
 ```
 
-> **Note:** The `src/` structure above is the *planned* layout. It will be created when the framework is initialized.
+---
+
+## API Flow
+
+### Single Endpoint: `POST /api/interview`
+
+```
+Request arrives
+    │
+    ▼
+[Discriminator] ─── Has `candidate`? → START flow
+                ─── Has `message`?   → CONVERSATION flow
+    │
+    ▼
+[Session Manager] ─── Load or create session
+    │
+    ▼
+[Interview Conductor] ─── Orchestrate the turn
+    │
+    ├──▶ [Theory Engine] ─── Score, confidence, strategy
+    ├──▶ [Gemini Service] ─── Generate/evaluate
+    └──▶ [Round Manager] ─── Track progression
+    │
+    ▼
+[Response Builder] ─── Spec-compliant + extended fields
+    │
+    ▼
+Response sent
+```
+
+---
+
+## State Management
+
+| State Type | Solution |
+|---|---|
+| Server session state | In-memory Map<sessionId, InterviewState> |
+| Client interview state | Zustand store |
+| UI state | React useState |
+| Form state | Controlled inputs |
 
 ---
 
 ## Component Hierarchy
 
 ```
-App
-├── Layout
-│   ├── Header
-│   │   ├── Logo
-│   │   ├── Navigation
-│   │   └── UserMenu
-│   ├── Main Content
-│   │   └── [Page Components]
-│   └── Footer
-├── Providers
-│   ├── ThemeProvider
-│   ├── AuthProvider (if needed)
-│   └── AIContextProvider
-└── Modals / Overlays
-    ├── ConfirmDialog
-    ├── Toast Notifications
-    └── Loading Overlay
+App (layout.tsx)
+├── Start Page
+│   ├── CandidateSelector
+│   ├── CandidateCard
+│   │   ├── ProfileInfo
+│   │   └── ModuleReadinessBars
+│   └── BeginButton
+├── Interview Page
+│   ├── ChatPanel
+│   │   ├── MessageList
+│   │   ├── PipelineIndicator
+│   │   └── AnswerInput (+ DemoButtons)
+│   ├── TheorySidebar
+│   │   ├── TheoryHeader (version + evidence count)
+│   │   ├── RadarChart
+│   │   ├── ModuleHealthBars (with confidence)
+│   │   ├── StrategyCard (after Q1)
+│   │   ├── ActivityFeed (after Q1)
+│   │   └── TheoryEvolution (after Q2)
+│   └── InterviewMap
+└── Report Page
+    ├── ReportHeader
+    ├── EngineeringReadiness (count-up animation)
+    ├── EngineeringDNA (hero radar chart)
+    ├── StrengthsGaps (two columns)
+    ├── ModuleHealth (8 bars with confidence)
+    ├── InterviewReplay (clickable timeline)
+    ├── DecisionTrace
+    ├── AssessmentConfidence
+    └── Recommendations
 ```
 
 ---
 
-## Database Schema
-
-**Status**: Not yet decided.
-
-Candidate technologies:
-- **Supabase** — Postgres + Auth + Realtime (good for rapid prototyping)
-- **Firebase** — NoSQL + Auth + Hosting (fast setup)
-- **Prisma + SQLite** — Local-first, no external dependency
-
-Decision will be made based on the product requirements.
-
----
-
-## API Flow
+## Deployment
 
 ```
-Client Request
-    │
-    ▼
-[Middleware] ─── Auth check ─── Rate limiting
-    │
-    ▼
-[Route Handler] ─── Validate input ─── Process logic
-    │
-    ├──▶ [Database] ─── CRUD operations
-    ├──▶ [AI Service] ─── Prompt → Response
-    └──▶ [Breeth] ─── Memory retrieval / storage
-    │
-    ▼
-[Response] ─── Format ─── Cache headers ─── Send
-```
-
----
-
-## Authentication
-
-**Status**: TBD — depends on product requirements.
-
-Options under consideration:
-
-| Option | Pros | Cons |
-|---|---|---|
-| No auth | Fastest to ship | No personalization |
-| Supabase Auth | Full-featured, free tier | Setup overhead |
-| NextAuth.js | Flexible, many providers | Config complexity |
-| Simple magic link | Low friction | Requires email service |
-
----
-
-## State Management
-
-**Recommended approach** (for a 48-hour hackathon):
-
-| State Type | Solution |
-|---|---|
-| Server state | React Query / SWR |
-| UI state | React `useState` / `useReducer` |
-| Global state | React Context (keep it minimal) |
-| Form state | React Hook Form or native |
-| URL state | Next.js router / search params |
-
-**Avoid** Redux, Zustand, or Jotai unless complexity demands it.
-
----
-
-## AI Layer
-
-```
-User Input
-    │
-    ▼
-[Prompt Builder] ─── System prompt + User input + Context
-    │
-    ▼
-[AI API Call] ─── OpenAI / Gemini / Anthropic
-    │
-    ▼
-[Response Parser] ─── Structured output extraction
-    │
-    ▼
-[UI Renderer] ─── Display to user
-    │
-    ▼
-[Memory Writer] ─── Store relevant context (Breeth)
-```
-
----
-
-## Memory Layer (Breeth)
-
-See `docs/MEMORY_STRATEGY.md` for the full strategy.
-
-Key principles:
-- Memory ≠ Application State
-- Memory ≠ Database
-- Memory = Persistent AI Context that improves over time
-- Only store what genuinely improves the user experience
-
----
-
-## Deployment Architecture
-
-**Target**: Single-command deployment with preview URLs.
-
-```
-Git Push → CI/CD Pipeline → Build → Deploy
-                                      │
-                               ┌──────┴──────┐
-                               │   Vercel /   │
-                               │   Railway    │
-                               └──────────────┘
+Git Push → Vercel Auto-Deploy → Live URL
 ```
 
 | Concern | Solution |
 |---|---|
-| Hosting | Vercel (frontend) / Railway (backend if separate) |
-| Domain | Provided by hosting or custom |
-| SSL | Automatic via hosting |
-| Environment vars | Platform secrets manager |
+| Hosting | Vercel (free tier) |
+| Domain | Vercel auto-generated |
+| SSL | Automatic |
+| Env vars | Vercel secrets (GEMINI_API_KEY) |
 | Preview deploys | Automatic on PR |
 
 ---
 
-## Performance Budget
+## Git Strategy
 
-| Metric | Target |
-|---|---|
-| Largest Contentful Paint | < 2.5s |
-| First Input Delay | < 100ms |
-| Cumulative Layout Shift | < 0.1 |
-| Bundle size (JS) | < 200KB gzipped |
-| Time to Interactive | < 3s |
+```
+main
+│
+├── dev                    (integration branch)
+│
+├── feature/frontend-core        ← Kirtan
+├── feature/backend-ai           ← Ayan
+└── feature/frontend-components  ← Person 3
+```
+
+PRs go to `dev`. Final merge `dev → main` after demo rehearsal.
 
 ---
 
-*Last updated: 2026-08-07T03:54:00+05:30*
+*Last updated: 2026-08-07*

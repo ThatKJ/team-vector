@@ -1,15 +1,15 @@
 # 📋 Product Requirements Document (PRD)
 
-> **Purpose**: Define what we're building, who it's for, and why it matters.  
-> **When to update**: When the product idea is finalized, scope changes, or features are added/removed.
+> **Purpose**: Define what we're building, who it's for, and why it matters.
+> **Status**: FINALIZED — Scope frozen.
 
 ---
 
 ## Product Vision
 
-**[To be defined by the team]**
+**Intervu AI** — An AI-powered interview agent that constructs a living Candidate Theory from cohort performance data, conducts hypothesis-driven interviews with curriculum-aware questions, and produces an evidence-backed Engineering Intelligence Report.
 
-*This section will be filled once the team finalizes the product idea. The PRD should answer: "What problem are we solving, and why should judges care?"*
+**One-liner**: "The LLM never decides what to ask next. Our deterministic Theory Engine does."
 
 ---
 
@@ -17,42 +17,52 @@
 
 | Persona | Description | Primary Need |
 |---|---|---|
-| Persona 1 | TBD | TBD |
-| Persona 2 | TBD | TBD |
+| Hackathon Judges | Evaluating our submission via the API | Spec-compliant API, impressive demo, technical depth |
+| Hiring Managers | Assessing candidates from AI cohort | Consistent, explainable, evidence-based assessments |
+| Candidates | Completing the interview | Actionable feedback with specific growth recommendations |
 
 ---
 
 ## Problem Statement
 
-*What pain point does this product address? Why does it matter now?*
+Technical interviews are broken in two ways:
+1. **For assessors**: Interviews are inconsistent and subjective. Two interviewers reach opposite conclusions about the same candidate.
+2. **For candidates**: They get pass/fail with no explanation. They don't know what to improve.
 
-> [To be defined]
+**Intervu AI solves both** by building a transparent, evidence-backed assessment model that shows exactly what it knows, why it believes it, and what changed after every answer.
 
 ---
 
 ## Proposed Solution
 
-*One-paragraph summary of the product.*
+An AI interview agent that:
+1. Receives a candidate profile with cohort performance data (missions, signals)
+2. Builds an initial Candidate Theory from that data
+3. Conducts a 5-round, strategy-driven interview with curriculum-aware questions
+4. Updates the Theory after every answer with evidence, confidence, and score deltas
+5. Produces a structured Engineering Intelligence Report with Engineering Readiness score
 
-> [To be defined]
+The system is split: **Gemini generates questions and evaluates answers. A deterministic Theory Engine decides strategy, builds the model, and produces the report.**
 
 ---
 
 ## Key Features (MVP Scope)
 
-These are the features that **must ship** within 48 hours to have a competitive submission.
-
-| Priority | Feature | Description | Estimated Effort | Status |
+| Priority | Feature | Description | Effort | Status |
 |---|---|---|---|---|
-| P0 | Core Feature 1 | TBD | TBD | ⏳ |
-| P0 | Core Feature 2 | TBD | TBD | ⏳ |
-| P1 | Nice-to-Have 1 | TBD | TBD | ⏳ |
-| P2 | Stretch Goal 1 | TBD | TBD | ⏳ |
-
-### Priority Legend
-- **P0** — Must have. Without this, the product doesn't make sense.
-- **P1** — Should have. Significantly improves the demo.
-- **P2** — Nice to have. Only if time permits.
+| P0 | API Endpoint | `POST /api/interview` per technical spec | 2h | ⏳ |
+| P0 | Theory Engine | Deterministic scoring, confidence, strategy selection | 8h | ⏳ |
+| P0 | Gemini Integration | Question generation + answer evaluation (structured JSON) | 6h | ⏳ |
+| P0 | Session Management | In-memory Map keyed by sessionId | 1.5h | ⏳ |
+| P0 | Start Screen | Candidate selector, profile, module readiness bars | 3h | ⏳ |
+| P0 | Interview Screen | Chat + Live Theory sidebar + Strategy panel | 8h | ⏳ |
+| P0 | Report Screen | Engineering Intelligence Report with radar, module health | 6h | ⏳ |
+| P1 | Progressive Disclosure | UI grows with interview (Amendment 2) | 2h | ⏳ |
+| P1 | Strategy Panel | Shows WHY each question was chosen | 2h | ⏳ |
+| P1 | Activity Feed | Scrolling log of AI decisions | 1.5h | ⏳ |
+| P1 | Interview Replay | Click question → full context in report | 2h | ⏳ |
+| P1 | Decision Trace | Strategy log in report | 1.5h | ⏳ |
+| P1 | Demo Mode | Pre-written answer buttons for deterministic demos | 1h | ⏳ |
 
 ---
 
@@ -60,65 +70,47 @@ These are the features that **must ship** within 48 hours to have a competitive 
 
 | Requirement | Target |
 |---|---|
-| Performance | Page load < 2s, interactions < 200ms |
-| Accessibility | WCAG 2.1 AA compliance |
-| Responsiveness | Mobile, tablet, desktop |
-| Browser Support | Chrome, Firefox, Safari (latest) |
-| SEO | Basic meta tags, semantic HTML |
+| API response time | < 5s per turn (LLM latency) |
+| Desktop support | Chrome, Firefox, Safari (latest) |
+| Accessibility | Basic ARIA, keyboard nav |
+| Performance | < 3s initial load |
 
 ---
 
 ## Judging Criteria Alignment
 
-Map every feature to hackathon judging criteria:
-
 | Criteria | Weight | How We Address It |
 |---|---|---|
-| Originality | High | TBD |
-| Polish | High | Professional UI, animations, error states |
-| User Experience | High | Intuitive flows, accessibility, responsiveness |
-| Technical Quality | Medium | Clean architecture, TypeScript, testing |
-| AI Steering | High | Documented AI usage, meaningful integration |
-| Demo Experience | High | Rehearsed demo script, strong narrative |
+| Originality | High | Candidate Theory + hypothesis-driven questioning + evidence chains |
+| Polish | High | Framer Motion animations, progressive disclosure, premium dark UI |
+| Technical Quality | Medium-High | Deterministic engine + LLM separation, TypeScript, clean architecture |
+| AI Steering | High | Documented AI usage, Gemini structured output, Theory Engine |
+| Demo Experience | High | Pre-seeded demo, 5-minute script, key message repeated 3× |
 
 ---
 
 ## Out of Scope
 
-Things we are **explicitly not building** in this hackathon:
-
-- Multi-tenant SaaS features
-- Payment processing
-- Email notifications
-- Admin dashboards (unless core to the product)
-- Native mobile apps
+- Authentication
+- Database persistence
+- Voice/speech input
+- Code editor
+- PDF export
+- Mobile/tablet optimization
+- Breeth integration
+- Cross-session memory
+- Multiple interview tracks
 
 ---
 
 ## Success Metrics
 
-How do we know the product is "done enough" to submit?
-
-1. ✅ Core features work end-to-end without crashes
-2. ✅ Demo can be delivered in under 5 minutes
-3. ✅ AI usage is well-documented
-4. ✅ Sponsor tech is meaningfully integrated
-5. ✅ No console errors in production build
-6. ✅ Responsive on mobile and desktop
+1. ✅ API passes all spec compliance checks (start, conversation, end, feedback)
+2. ✅ Interview adapts to candidate's cohort data (different questions for different candidates)
+3. ✅ Demo can be delivered in under 5 minutes with deterministic answers
+4. ✅ Engineering Intelligence Report shows evidence-backed scores
+5. ✅ Judges can see WHY each question was asked (strategy panel + decision trace)
 
 ---
 
-## Open Questions
-
-*Track unresolved product decisions here:*
-
-- [ ] What is the product idea?
-- [ ] Who is the primary target user?
-- [ ] Which sponsor technologies are we integrating?
-- [ ] What AI model(s) are we using?
-- [ ] Do we need authentication?
-- [ ] Do we need a database?
-
----
-
-*Last updated: 2026-08-07T03:54:00+05:30*
+*Last updated: 2026-08-07*

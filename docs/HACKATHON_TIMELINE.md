@@ -1,180 +1,138 @@
-# ⏱️ Hackathon Timeline — 48-Hour Sprint Plan
+# ⏱️ Hackathon Timeline — Sprint Plan
 
-> **Purpose**: Hour-by-hour battle plan for the hackathon. Know what to do at every moment.  
-> **When to update**: When milestones shift, we fall behind, or priorities change.  
-> **Rule**: Check this file every 4 hours. If we're behind, cut scope — don't extend hours.
+> **Purpose**: Phase-by-phase plan for the hackathon.
+> **Rule**: Check every 4 hours. If behind, cut scope — don't extend hours.
 
 ---
 
 ## Timeline Overview
 
 ```
-Hour 0                    Hour 12                   Hour 24
-│█████████████████████████│█████████████████████████│
-│ IDEA │ ARCH │  CORE FEATURES SPRINT              │
-│      │      │                                     │
-
-Hour 24                   Hour 36                   Hour 48
-│█████████████████████████│█████████████████████████│
-│    FEATURES CONTINUED   │ POLISH │ DEMO │ SUBMIT │
-│                         │        │      │        │
+Hour 0          Hour 2         Hour 10         Hour 20         Hour 28        Hour 36
+│ SETUP         │ CORE SHELLS  │ INTEGRATION   │ POLISH         │ DEMO PREP    │
+│ Types, mocks  │ 3 screens    │ Real API ↔    │ Animations     │ Rehearsal    │
+│ Project init  │ Mock data    │ Real frontend │ Prompt tuning  │ Deployment   │
+│ Design system │ LLM works    │ Theory live   │ Bug fixes      │ Submit       │
 ```
 
 ---
 
-## Detailed Hour-by-Hour Plan
+## Phase 0: Setup (Hours 0–2) 🏁
 
-### Phase 1: Foundation (Hours 0–2) 🏁
+**Goal**: Everyone can work independently.
 
-**Goal**: Idea locked, PRD written, architecture decided.
-
-| Hour | Activity | Output | Owner |
-|---|---|---|---|
-| 0:00 | Problem statement released → Read & discuss | Understanding | Team |
-| 0:30 | Brainstorm ideas (timeboxed!) | 3-5 candidate ideas | Team |
-| 1:00 | Select idea → Apply judging filter | Winning idea chosen | Team |
-| 1:15 | Write PRD (update `docs/PRD.md`) | Complete PRD | AI + Human |
-| 1:30 | High-level architecture (update `docs/ARCHITECTURE.md`) | Architecture decided | AI + Human |
-| 1:45 | Update `docs/FEATURE_MATRIX.md` with features | Prioritized features | AI + Human |
-| 2:00 | **Checkpoint**: PRD, Architecture, Features locked ✅ | | |
-
-**Risks at this phase**:
-- ⚠️ Spending too long on ideation → Timebox to 30 minutes
-- ⚠️ Choosing a too-complex idea → Apply `DO_NOT_BUILD.md` filter
-
----
-
-### Phase 2: Architecture & Setup (Hours 2–6) 🏗️
-
-**Goal**: Development environment running, design system in place, core structure built.
-
-| Hour | Activity | Output | Owner |
-|---|---|---|---|
-| 2:00 | Initialize framework (Next.js / Vite) | Running dev server | AI |
-| 2:30 | Set up design system (tokens, fonts, base CSS) | `UI_GUIDELINES.md` implemented | AI |
-| 3:00 | Create component library (Button, Input, Card, Layout) | Reusable primitives | AI |
-| 3:30 | Set up database & schema (if needed) | Database connected | AI |
-| 4:00 | Set up API structure & types | API routes scaffolded | AI |
-| 4:30 | Set up AI integration service | AI API connected | AI |
-| 5:00 | Set up Breeth integration (if applicable) | Memory layer connected | AI |
-| 5:30 | Landing page / main layout | Visible product shell | AI |
-| 6:00 | **Checkpoint**: Can navigate the app, components work ✅ | | |
-
-**Risks at this phase**:
-- ⚠️ Over-engineering the setup → Keep it minimal, iterate later
-- ⚠️ Dependency issues → Use proven, well-documented libraries only
-
----
-
-### Phase 3: Core Features (Hours 6–20) 💻
-
-**Goal**: P0 features complete and working end-to-end.
-
-| Hour | Activity | Output | Owner |
-|---|---|---|---|
-| 6:00 | Start P0 Feature 1 (core value proposition) | | AI + Human |
-| 10:00 | **4-hour checkpoint**: Feature 1 should be working | Feature 1 MVP | |
-| 10:00 | Start P0 Feature 2 (AI-powered feature) | | AI + Human |
-| 14:00 | **4-hour checkpoint**: Feature 2 should be working | Feature 2 MVP | |
-| 14:00 | Integration testing — do features work together? | | AI + Human |
-| 16:00 | Fix integration issues, edge cases | Stable core flow | |
-| 16:00 | Start P1 features (if P0 complete) | | AI + Human |
-| 20:00 | **Checkpoint**: Core product works end-to-end ✅ | | |
-
-**Risks at this phase**:
-- ⚠️ Feature taking longer than estimated → Cut scope, ship the MVP version
-- ⚠️ Getting stuck on a bug → 30-minute timebox, then workaround
-- ⚠️ Scope creep → Check `FEATURE_MATRIX.md` before adding anything
-
----
-
-### Phase 4: Remaining Features (Hours 20–36) 🔧
-
-**Goal**: P1 features complete, sponsor integration solid, app is feature-complete.
-
-| Hour | Activity | Output | Owner |
-|---|---|---|---|
-| 20:00 | Continue P1 features | | AI + Human |
-| 24:00 | **HALFWAY CHECKPOINT** 🚨 | | |
-| | → All P0 features must be done | | |
-| | → Demo path must work | | |
-| | → If P0 not done, STOP everything else and finish P0 | | |
-| 24:00 | Sponsor integration finalized | Breeth working (if used) | AI + Human |
-| 28:00 | P1 features complete | | AI + Human |
-| 32:00 | Loading/error/empty states for all views | UI states complete | AI |
-| 34:00 | Responsive design pass | Mobile works | AI |
-| 36:00 | **Checkpoint**: Feature-complete, all states handled ✅ | | |
-
-**Risks at this phase**:
-- ⚠️ Halfway checkpoint reveals P0 incomplete → All hands on P0
-- ⚠️ Sponsor tech doesn't work → Remove it rather than force it
-
----
-
-### Phase 5: Polish (Hours 36–44) ✨
-
-**Goal**: The product feels premium. Every detail is intentional.
-
-| Hour | Activity | Output | Owner |
-|---|---|---|---|
-| 36:00 | Animations & micro-interactions | Smooth UI | AI |
-| 37:00 | Typography & spacing audit | Consistent design | AI |
-| 38:00 | Accessibility audit (ARIA, keyboard, focus) | Accessible app | AI |
-| 39:00 | Performance audit (Lighthouse, bundle size) | Fast app | AI |
-| 40:00 | Content pass — replace all placeholder text | Real content | Human |
-| 41:00 | Bug bash — test every feature, every screen | `KNOWN_BUGS.md` updated | Team |
-| 42:00 | Fix critical and high bugs only | Stable app | AI |
-| 43:00 | Seed demo data | Realistic demo | AI + Human |
-| 44:00 | **Checkpoint**: Product is polished and demo-ready ✅ | | |
-
-**Risks at this phase**:
-- ⚠️ Temptation to add features → STOP. Polish only. See `DO_NOT_BUILD.md`.
-- ⚠️ Finding too many bugs → Only fix demo-path bugs
-
----
-
-### Phase 6: Demo & Submission (Hours 44–48) 🎬
-
-**Goal**: Demo is rehearsed, submission is complete, we're confident.
-
-| Hour | Activity | Output | Owner |
-|---|---|---|---|
-| 44:00 | Deploy to production | Live URL | AI |
-| 44:30 | Test production deployment | Everything works live | Team |
-| 45:00 | Write/update demo script (`docs/DEMO.md`) | Rehearsal-ready script | Human |
-| 45:30 | Demo rehearsal #1 | Timing confirmed | Team |
-| 46:00 | Fix any issues found during rehearsal | | AI |
-| 46:30 | Demo rehearsal #2 | Smooth delivery | Team |
-| 47:00 | Record backup demo video | `assets/demo/` | Team |
-| 47:15 | Take final screenshots | `assets/screenshots/` | Team |
-| 47:30 | Final documentation pass | All docs current | AI |
-| | → `PROJECT_CONTEXT.md` updated | | |
-| | → `PROMPTS.md` complete | | |
-| | → `SPONSOR_USAGE.md` complete | | |
-| | → `FEATURE_MATRIX.md` finalized | | |
-| | → `README.md` written | | |
-| 48:00 | **SUBMIT** 🚀 | | |
-
-**Risks at this phase**:
-- ⚠️ Production deployment fails → Have a Vercel/Netlify backup
-- ⚠️ Demo rehearsal reveals issues → Fix only critical, skip cosmetic
-- ⚠️ Running out of time → Submit what you have. Something > nothing.
-
----
-
-## Checkpoint Summary
-
-| Hour | Checkpoint | Must Be True |
+| Hour | Task | Owner |
 |---|---|---|
-| 2 | Foundation | PRD, architecture, features locked |
-| 6 | Setup | Dev environment running, components built |
-| 10 | Feature 1 | Core feature working |
-| 14 | Feature 2 | AI feature working |
-| 20 | Core | Product works end-to-end |
-| 24 | **HALFWAY** | **All P0 done, demo path works** |
-| 36 | Feature-complete | All planned features done, states handled |
-| 44 | Polish-complete | Product feels premium |
-| 48 | **SUBMIT** | **Everything shipped** |
+| 0:00 | `npx create-next-app` + Tailwind + Framer + Recharts + Zustand | Person 3 |
+| 0:00 | TypeScript interfaces (`/lib/types.ts`) | Ayan |
+| 0:00 | Tailwind config — colors, fonts, spacing, dark theme | Kirtan |
+| 0:30 | Mock response JSON files (`/lib/mocks/`) | Ayan |
+| 0:30 | UI primitives — Button, Card, Badge, Panel | Kirtan |
+| 1:00 | API route stub (`/api/interview/route.ts`) | Ayan |
+| 1:00 | Zustand store skeleton | Person 3 |
+| 1:00 | Import curriculum.json + candidates.json | Ayan |
+| 2:00 | **Checkpoint**: Dev server runs, types shared, mocks available ✅ |
+
+---
+
+## Phase 1: Core Shells (Hours 2–10) 💻
+
+**Goal**: All 3 screens render with mock data. Backend generates real questions.
+
+| Hour | Task | Owner |
+|---|---|---|
+| 2:00 | Start Screen (selector, profile, module readiness) | Kirtan |
+| 2:00 | Radar chart + Module bar components | Person 3 |
+| 2:00 | Theory Engine v1 (candidate analyzer, module scoring) | Ayan |
+| 4:00 | Interview Screen layout (chat + sidebar shell) | Kirtan |
+| 4:00 | Activity Feed, Strategy Card, Evidence Counter | Person 3 |
+| 4:00 | Strategy Engine + Round Manager | Ayan |
+| 6:00 | Sidebar processing animation | Kirtan |
+| 6:00 | Report Screen layout (all sections, mock data) | Person 3 |
+| 6:00 | Gemini integration — question generation | Ayan |
+| 8:00 | Progressive disclosure logic | Kirtan |
+| 8:00 | Interview Replay + Decision Trace components | Person 3 |
+| 8:00 | Gemini integration — answer evaluation | Ayan |
+| 10:00 | **Checkpoint #1** ✅ |
+
+**Must be true at Hour 10**:
+- ✅ All 3 screens render with mock data
+- ✅ Backend returns real question for at least 1 candidate
+- ✅ Charts render and animate
+- ✅ Sidebar processing works
+
+---
+
+## Phase 2: Integration (Hours 10–20) 🔧
+
+**Goal**: Real API ↔ real frontend. Theory updates live.
+
+| Hour | Task | Owner |
+|---|---|---|
+| 10:00 | Connect Interview Screen to real API | Person 3 |
+| 10:00 | Theory Engine v2 (confidence, gaps, round transitions) | Ayan |
+| 10:00 | Live Theory animations (bars, confidence, version) | Kirtan |
+| 13:00 | Connect Report Screen to real API | Person 3 |
+| 13:00 | Follow-up decision logic (ESCALATE vs RECOVER) | Ayan |
+| 13:00 | Strategy panel live updates | Kirtan |
+| 15:00 | Activity Feed populated from API | Person 3 |
+| 15:00 | Feedback generator (spec-compliant) | Ayan |
+| 15:00 | Pipeline step indicators | Kirtan |
+| 17:00 | Score deltas with reasons | Person 3 |
+| 17:00 | Report builder (readiness, traces, replay data) | Ayan |
+| 17:00 | Interview Map live updates | Kirtan |
+| 20:00 | **Checkpoint #2** ✅ |
+
+**Must be true at Hour 20**:
+- ✅ Full interview works end-to-end
+- ✅ Theory updates visually after each answer
+- ✅ Strategy panel shows real reasoning
+- ✅ Report populates with real data
+- ✅ Feedback is spec-compliant
+
+---
+
+## Phase 3: Polish (Hours 20–28) ✨
+
+**Goal**: Production quality. Demo-ready.
+
+| Hour | Task | Owner |
+|---|---|---|
+| 20:00 | Micro-animations (transitions, reveals) | Kirtan |
+| 20:00 | Prompt refinement (3+ candidates) | Ayan |
+| 20:00 | Theory Evolution timeline | Person 3 |
+| 22:00 | Engineering Readiness count-up animation | Kirtan |
+| 22:00 | Multi-candidate validation | Ayan |
+| 22:00 | Assessment Confidence card | Person 3 |
+| 24:00 | Engineering DNA radar fill animation | Kirtan |
+| 24:00 | Error handling (timeouts, fallbacks) | Ayan |
+| 24:00 | Demo mode (`?demo=true` + answer buttons) | Person 3 |
+| 26:00 | Loading skeletons | Kirtan |
+| 26:00 | Seed demo answers for CAND-003 | Ayan |
+| 26:00 | Bug fixing | Person 3 |
+| 28:00 | Visual consistency pass | Kirtan |
+| 28:00 | **Checkpoint #3 — FEATURE FREEZE** 🚫 ✅ |
+
+---
+
+## Phase 4: Demo Prep (Hours 28–36) 🎬
+
+**🚫 NO NEW FEATURES. Only demo, deploy, document.**
+
+| Hour | Task | Owner |
+|---|---|---|
+| 28:00 | Demo script finalization | Kirtan |
+| 28:30 | Demo rehearsal #1 | ALL |
+| 29:00 | Fix rehearsal issues | Ayan + Person 3 |
+| 30:00 | Demo rehearsal #2 | ALL |
+| 30:30 | Record backup video | Kirtan |
+| 31:00 | Production deployment to Vercel | Ayan |
+| 31:30 | Test production deployment | ALL |
+| 32:00 | Final bug bash (demo path only) | Person 3 |
+| 33:00 | README finalization | ALL |
+| 34:00 | PROMPTS.md finalization | ALL |
+| 35:00 | Final documentation pass | ALL |
+| 36:00 | **SUBMIT** 🚀 |
 
 ---
 
@@ -182,12 +140,13 @@ Hour 24                   Hour 36                   Hour 48
 
 | Situation | Action |
 |---|---|
-| Behind by 2+ hours | Cut the lowest-priority P1 feature |
-| Behind by 4+ hours | Cut ALL P1 features, focus on P0 polish |
-| P0 feature broken at hour 24 | All hands on fixing it. Nothing else matters. |
-| Can't deploy at hour 44 | Use Vercel CLI, Railway, or even GitHub Pages |
-| Demo rehearsal is a disaster | Simplify the demo. Show fewer features, show them well. |
+| Behind by 2+ hours at Phase 1 | Cut Tier 2 items. Focus on Tier 1 only. |
+| Behind by 4+ hours at Phase 2 | All hands on API compliance + basic UI. Skip animations. |
+| LLM responses unreliable | Hardcode fallback questions per module. |
+| Integration breaks at Hour 14 | Person 3 drops everything and debugs integration. |
+| Can't deploy at Hour 31 | Use Vercel CLI or Netlify as backup. |
+| Demo rehearsal fails | Simplify. Show fewer questions. Pre-record backup video. |
 
 ---
 
-*Last updated: 2026-08-07T04:05:00+05:30*
+*Last updated: 2026-08-07*
