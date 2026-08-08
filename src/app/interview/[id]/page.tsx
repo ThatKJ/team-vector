@@ -33,8 +33,12 @@ export default function InterviewPage() {
   const [activeTab, setActiveTab] = useState<"chat" | "context" | "eval">("chat");
   
   const bottomRef = useRef<HTMLDivElement>(null);
+  const initRef = useRef(false);
 
   useEffect(() => {
+    if (initRef.current) return;
+    initRef.current = true;
+    
     let mounted = true;
     const init = async () => {
       try {
