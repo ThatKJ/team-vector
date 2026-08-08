@@ -15,7 +15,6 @@ export async function GET(request: Request, context: any) {
       return NextResponse.json({ error: 'Report not found' }, { status: 404 });
     }
 
-    // Map the backend's simplistic report/feedback into the structured format the UI expects
     return NextResponse.json({
       score: report.overall_score || 0,
       categories: {

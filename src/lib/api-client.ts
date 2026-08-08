@@ -35,13 +35,25 @@ class ApiClient {
         }
       };
     }
-    const res = await fetch(`${this.baseUrl}/interviews/start`, {
+    const res = await fetch(`${this.baseUrl}/interview`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ candidate_id: candidateId })
+      body: JSON.stringify({ sessionId: candidateId, candidate: { id: candidateId } })
     });
     if (!res.ok) throw new Error("Failed to start interview");
-    return res.json();
+    const data = await res.json();
+    
+    // Map backend format to frontend format
+    return {
+      interview_id: candidateId, // using candidateId as sessionId
+      status: "in_progress",
+      first_turn: {
+        turn_id: "turn_1",
+        question: data.reply,
+        topic: "Introduction",
+        turn_number: 1
+      }
+    };
   }
 
   async submitAnswer(interviewId: string, payload: SubmitAnswerRequest): Promise<SubmitAnswerResponse> {
@@ -69,13 +81,32 @@ class ApiClient {
       };
     }
 
-    const res = await fetch(`${this.baseUrl}/interviews/${interviewId}/turn`, {
+    const res = await fetch(`${this.baseUrl}/interview`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+      body: JSON.stringify({ sessionId: interviewId, message: payload.answer })
     });
     if (!res.ok) throw new Error("Failed to submit answer");
-    return res.json();
+    const data = await res.json();
+
+    if (data.done) {
+      return {
+        evaluation_status: "processed",
+        is_complete: true
+      };
+    }
+
+    const currentTurn = parseInt(payload.turn_id.replace("turn_", "")) || 1;
+    return {
+      evaluation_status: "processed",
+      is_complete: false,
+      next_turn: {
+        turn_id: `turn_${currentTurn + 1}`,
+        question: data.reply,
+        topic: "Adaptive Follow-up",
+        turn_number: currentTurn + 1
+      }
+    };
   }
 
   async getReport(interviewId: string): Promise<InterviewReport> {
