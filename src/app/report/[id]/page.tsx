@@ -45,8 +45,8 @@ export default function ReportPage() {
             <div className="md:col-span-1 space-y-6">
               <Card>
                 <CardContent className="pt-8 pb-8 flex flex-col items-center justify-center text-center">
-                   <div className="w-32 h-32 rounded-full border-4 border-[var(--color-primary)] flex items-center justify-center mb-4 shadow-[0_0_40px_rgba(67,185,107,0.2)]">
-                     <span className="font-heading text-5xl font-bold text-[var(--color-primary)]">{report.score}</span>
+                   <div className="w-32 h-32 rounded-full border border-[var(--color-border)] bg-[#f7f7f4] flex items-center justify-center mb-4">
+                     <span className="font-heading text-5xl font-bold text-[var(--color-foreground)]">{report.score}</span>
                    </div>
                    <h2 className="font-bold text-lg">Engineering Readiness</h2>
                    <p className="text-sm text-[var(--color-muted-foreground)] mt-1">Top 15% of cohort</p>

@@ -11,6 +11,7 @@ import { AnswerBubble } from "@/components/intervu/AnswerBubble";
 import { TypingIndicator } from "@/components/intervu/TypingIndicator";
 import { apiClient } from "@/lib/api-client";
 import { InterviewTurn } from "@/lib/types";
+import { Info, MessageSquare, LayoutDashboard } from "lucide-react";
 
 interface ChatMessage {
   role: "interviewer" | "candidate";
@@ -27,6 +28,7 @@ export default function InterviewPage() {
   const [answerInput, setAnswerInput] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0); 
+  const [activeTab, setActiveTab] = useState<"chat" | "context" | "eval">("chat");
   
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -46,8 +48,10 @@ export default function InterviewPage() {
   }, [id]);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [chat, isProcessing]);
+    if (activeTab === "chat") {
+      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [chat, isProcessing, activeTab]);
 
   const handleSubmit = async () => {
     if (!answerInput.trim() || !currentTurn || isProcessing) return;
@@ -77,41 +81,93 @@ export default function InterviewPage() {
     }
   };
 
+  const contextPanelContent = (
+    <Card className="flex-1 border-none lg:border-solid lg:border-[var(--color-border)] shadow-none lg:shadow-sm">
+      <CardContent className="pt-6">
+        <h3 className="text-sm font-semibold uppercase tracking-wider text-[var(--color-muted-foreground)] mb-4">Session Context</h3>
+        <div className="space-y-4">
+          <div>
+            <p className="text-xs text-[var(--color-muted-foreground)] mb-1">Candidate</p>
+            <p className="font-medium text-sm">Alex Chen</p>
+          </div>
+          <div>
+            <p className="text-xs text-[var(--color-muted-foreground)] mb-1">Focus Area</p>
+            <p className="font-medium text-sm">Backend Systems</p>
+          </div>
+          <div className="pt-4 border-t border-[var(--color-border)]">
+            <p className="text-xs text-[var(--color-muted-foreground)] mb-2">Curriculum Scope</p>
+            <ul className="text-sm space-y-2 text-[var(--color-foreground)]">
+              <li className="flex items-center gap-2"><div className="h-2 w-2 rounded-full bg-[var(--color-primary)]"/> Vector Search</li>
+              <li className="flex items-center gap-2"><div className="h-2 w-2 rounded-full bg-[var(--color-primary)]"/> System Design</li>
+              <li className="flex items-center gap-2"><div className="h-2 w-2 rounded-full bg-[var(--color-primary)]"/> RAG Optimization</li>
+            </ul>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  const evalPanelContent = (
+    <Card className="flex-1 border-none lg:border-solid lg:border-[var(--color-border)] shadow-none lg:shadow-sm">
+      <CardContent className="pt-6">
+        <h3 className="text-sm font-semibold uppercase tracking-wider text-[var(--color-muted-foreground)] mb-4">Evaluation Context</h3>
+        
+        <div className="mb-6">
+          <div className="flex justify-between text-xs mb-2">
+            <span className="font-medium text-[var(--color-foreground)]">Interview Progress</span>
+            <span className="font-mono text-[var(--color-muted-foreground)]">{progress} / 8</span>
+          </div>
+          <Progress value={progress} max={8} />
+        </div>
+
+        <div className="space-y-4">
+          <div>
+            <p className="text-xs text-[var(--color-muted-foreground)] mb-1">Current Topic</p>
+            <p className="font-medium text-sm text-[var(--color-primary)]">{currentTurn?.topic || "Processing..."}</p>
+          </div>
+          <div className="pt-4 border-t border-[var(--color-border)]">
+            <p className="text-xs text-[var(--color-muted-foreground)] mb-1">Active Competency</p>
+            <p className="font-medium text-sm">System Design & Tradeoffs</p>
+          </div>
+          <div className="pt-4 border-t border-[var(--color-border)]">
+            <p className="text-xs text-[var(--color-muted-foreground)] mb-1">State</p>
+            <p className="font-mono text-xs text-amber-600 bg-amber-50 p-2 rounded">
+              {isProcessing ? "Evaluating reasoning..." : "Awaiting response..."}
+            </p>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
   return (
-    <div className="flex flex-col h-screen bg-[var(--color-background)]">
+    <div className="flex flex-col h-[100dvh] bg-[var(--color-background)]">
       <Navbar />
       
-      <main className="flex-1 overflow-hidden grid grid-cols-1 lg:grid-cols-12 gap-6 p-4 sm:p-6 lg:p-8 max-w-[1920px] mx-auto w-full">
+      {/* Mobile Tabs */}
+      <div className="lg:hidden flex border-b border-[var(--color-border)] bg-[var(--color-surface)] px-4">
+        <button onClick={() => setActiveTab("context")} className={`flex-1 py-3 text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2 ${activeTab === "context" ? "border-b-2 border-[var(--color-primary)] text-[var(--color-primary)]" : "text-[var(--color-muted-foreground)]"}`}>
+          <Info className="w-4 h-4" /> Context
+        </button>
+        <button onClick={() => setActiveTab("chat")} className={`flex-1 py-3 text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2 ${activeTab === "chat" ? "border-b-2 border-[var(--color-primary)] text-[var(--color-primary)]" : "text-[var(--color-muted-foreground)]"}`}>
+          <MessageSquare className="w-4 h-4" /> Interview
+        </button>
+        <button onClick={() => setActiveTab("eval")} className={`flex-1 py-3 text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2 ${activeTab === "eval" ? "border-b-2 border-[var(--color-primary)] text-[var(--color-primary)]" : "text-[var(--color-muted-foreground)]"}`}>
+          <LayoutDashboard className="w-4 h-4" /> Status
+        </button>
+      </div>
+
+      <main className="flex-1 overflow-hidden grid grid-cols-1 lg:grid-cols-12 gap-0 lg:gap-6 p-0 lg:p-6 lg:pb-8 max-w-[1920px] mx-auto w-full">
         
-        <aside className="hidden lg:flex lg:col-span-3 flex-col gap-6 overflow-y-auto">
-          <Card className="flex-1">
-            <CardContent className="pt-6">
-              <h3 className="text-sm font-semibold uppercase tracking-wider text-[var(--color-muted-foreground)] mb-4">Session Context</h3>
-              <div className="space-y-4">
-                <div>
-                  <p className="text-xs text-[var(--color-muted-foreground)] mb-1">Candidate</p>
-                  <p className="font-medium text-sm">Alex Chen</p>
-                </div>
-                <div>
-                  <p className="text-xs text-[var(--color-muted-foreground)] mb-1">Focus Area</p>
-                  <p className="font-medium text-sm">Backend Systems</p>
-                </div>
-                <div className="pt-4 border-t border-[var(--color-border)]">
-                  <p className="text-xs text-[var(--color-muted-foreground)] mb-2">Curriculum Scope</p>
-                  <ul className="text-sm space-y-2 text-[var(--color-foreground)]">
-                    <li className="flex items-center gap-2"><div className="h-2 w-2 rounded-full bg-[var(--color-primary)]"/> Vector Search</li>
-                    <li className="flex items-center gap-2"><div className="h-2 w-2 rounded-full bg-[var(--color-primary)]"/> System Design</li>
-                    <li className="flex items-center gap-2"><div className="h-2 w-2 rounded-full bg-[var(--color-primary)]"/> RAG Optimization</li>
-                  </ul>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        {/* Left Column: Context */}
+        <aside className={`${activeTab === "context" ? "flex" : "hidden"} lg:flex lg:col-span-3 flex-col gap-6 overflow-y-auto p-4 lg:p-0`}>
+          {contextPanelContent}
         </aside>
 
-        <section className="col-span-1 lg:col-span-6 flex flex-col bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[24px] shadow-[0px_12px_32px_rgba(45,49,46,0.04)] overflow-hidden relative h-full max-h-full">
+        {/* Center Column: Conversation */}
+        <section className={`${activeTab === "chat" ? "flex" : "hidden"} lg:flex col-span-1 lg:col-span-6 flex-col bg-[var(--color-surface)] lg:border lg:border-[var(--color-border)] lg:rounded-[24px] lg:shadow-sm overflow-hidden relative h-full max-h-full`}>
           
-          <div className="px-6 py-4 border-b border-[var(--color-border)] flex justify-between items-center bg-[var(--color-surface)]/80 backdrop-blur z-10">
+          <div className="hidden lg:flex px-6 py-4 border-b border-[var(--color-border)] justify-between items-center bg-[var(--color-surface)]/80 backdrop-blur z-10">
              <div className="flex items-center gap-3">
                <div className="h-2 w-2 rounded-full bg-[var(--color-primary)] animate-pulse" />
                <span className="font-semibold text-sm">Live Assessment</span>
@@ -119,7 +175,7 @@ export default function InterviewPage() {
              <span className="font-mono text-xs text-[var(--color-muted-foreground)]">00:14:23</span>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-6 scroll-smooth bg-[var(--color-surface)]">
+          <div className="flex-1 overflow-y-auto p-4 lg:p-6 scroll-smooth bg-[var(--color-surface)]">
             {chat.map((msg, idx) => (
               msg.role === "interviewer" ? (
                 <QuestionBubble key={idx} text={msg.text} />
@@ -127,14 +183,14 @@ export default function InterviewPage() {
                 <AnswerBubble key={idx} text={msg.text} />
               )
             ))}
-            {isProcessing && <TypingIndicator />}
+            {isProcessing && <TypingIndicator text="Evaluating reasoning..." />}
             <div ref={bottomRef} />
           </div>
 
-          <div className="p-4 bg-[var(--color-background)] border-t border-[var(--color-border)]">
+          <div className="p-3 lg:p-4 bg-[var(--color-background)] lg:border-t border-[var(--color-border)] shadow-[0_-4px_16px_rgba(0,0,0,0.05)] lg:shadow-none">
             <div className="relative rounded-[16px] overflow-hidden border border-[var(--color-border)] bg-[var(--color-surface)] focus-within:ring-2 focus-within:ring-[var(--color-primary)] transition-shadow">
               <textarea
-                className="w-full min-h-[100px] resize-none p-4 pr-24 bg-transparent outline-none text-sm text-[var(--color-foreground)] placeholder:text-[var(--color-muted-foreground)]"
+                className="w-full min-h-[120px] lg:min-h-[100px] resize-none p-4 pr-24 bg-transparent outline-none text-sm text-[var(--color-foreground)] placeholder:text-[var(--color-muted-foreground)]"
                 placeholder="Type your response..."
                 value={answerInput}
                 onChange={e => setAnswerInput(e.target.value)}
@@ -150,35 +206,13 @@ export default function InterviewPage() {
                 </Button>
               </div>
             </div>
-            <p className="text-[11px] text-center text-[var(--color-muted-foreground)] mt-3">Press <kbd className="font-mono bg-[#E5E5DF] text-[#1A1C1B] px-1.5 py-0.5 rounded shadow-sm">Cmd + Enter</kbd> to submit</p>
+            <p className="hidden lg:block text-[11px] text-center text-[var(--color-muted-foreground)] mt-3">Press <kbd className="font-mono bg-[#E5E5DF] text-[#1A1C1B] px-1.5 py-0.5 rounded shadow-sm">Cmd + Enter</kbd> to submit</p>
           </div>
         </section>
 
-        <aside className="hidden lg:flex lg:col-span-3 flex-col gap-6 overflow-y-auto">
-          <Card>
-            <CardContent className="pt-6">
-              <h3 className="text-sm font-semibold uppercase tracking-wider text-[var(--color-muted-foreground)] mb-4">Evaluation Context</h3>
-              
-              <div className="mb-6">
-                <div className="flex justify-between text-xs mb-2">
-                  <span className="font-medium text-[var(--color-foreground)]">Interview Progress</span>
-                  <span className="font-mono text-[var(--color-muted-foreground)]">{progress} / 8</span>
-                </div>
-                <Progress value={progress} max={8} />
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <p className="text-xs text-[var(--color-muted-foreground)] mb-1">Current Topic</p>
-                  <p className="font-medium text-sm text-[var(--color-primary)]">{currentTurn?.topic || "Processing..."}</p>
-                </div>
-                <div className="pt-4 border-t border-[var(--color-border)]">
-                  <p className="text-xs text-[var(--color-muted-foreground)] mb-1">Active Competency</p>
-                  <p className="font-medium text-sm">System Design & Tradeoffs</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        {/* Right Column: Intelligence */}
+        <aside className={`${activeTab === "eval" ? "flex" : "hidden"} lg:flex lg:col-span-3 flex-col gap-6 overflow-y-auto p-4 lg:p-0`}>
+          {evalPanelContent}
         </aside>
 
       </main>
