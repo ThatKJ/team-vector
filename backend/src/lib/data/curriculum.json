@@ -1,0 +1,229 @@
+[
+  {
+    "id": 1,
+    "name": "Environment & Tooling",
+    "description": "Basic setup, git, python, and tooling for AI engineering.",
+    "startDay": 1,
+    "endDay": 3,
+    "days": [
+      {
+        "day": 1,
+        "topics": ["Python Basics", "Virtual Environments"],
+        "objectives": ["Set up python", "Understand environments"]
+      },
+      {
+        "day": 2,
+        "topics": ["Git and GitHub"],
+        "objectives": ["Version control basics"]
+      },
+      {
+        "day": 3,
+        "topics": ["Docker Basics"],
+        "objectives": ["Containerization concepts"]
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "name": "Data Foundations",
+    "description": "Data wrangling, cleaning, and preparation for ML.",
+    "startDay": 4,
+    "endDay": 6,
+    "days": [
+      {
+        "day": 4,
+        "topics": ["Pandas basics"],
+        "objectives": ["Dataframes and series"]
+      },
+      {
+        "day": 5,
+        "topics": ["Data Cleaning"],
+        "objectives": ["Handling missing values", "Outliers"]
+      },
+      {
+        "day": 6,
+        "topics": ["Data Visualization"],
+        "objectives": ["Matplotlib", "Seaborn"]
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "name": "Embeddings & Vector Search",
+    "description": "Vector representations of text and efficient search algorithms.",
+    "startDay": 7,
+    "endDay": 10,
+    "days": [
+      {
+        "day": 7,
+        "topics": ["Word Embeddings", "Word2Vec"],
+        "objectives": ["Understand dense vector representations"]
+      },
+      {
+        "day": 8,
+        "topics": ["Sentence Transformers"],
+        "objectives": ["Contextual embeddings"]
+      },
+      {
+        "day": 9,
+        "topics": ["Vector Databases", "ChromaDB", "Pinecone"],
+        "objectives": ["Storing and retrieving vectors", "Metadata filtering"]
+      },
+      {
+        "day": 10,
+        "topics": ["Semantic Search", "Cosine Similarity"],
+        "objectives": ["Distance metrics", "Approximate nearest neighbors"]
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "name": "LLM Core, Prompting & Fine-Tuning",
+    "description": "Understanding large language models, prompt engineering, and fine-tuning.",
+    "startDay": 11,
+    "endDay": 15,
+    "days": [
+      {
+        "day": 11,
+        "topics": ["Transformer Architecture"],
+        "objectives": ["Self-attention mechanism", "Encoder/Decoder"]
+      },
+      {
+        "day": 12,
+        "topics": ["Prompt Engineering", "Few-shot prompting"],
+        "objectives": ["Crafting effective prompts", "In-context learning"]
+      },
+      {
+        "day": 13,
+        "topics": ["Advanced Prompting", "Chain of Thought"],
+        "objectives": ["Reasoning steps in prompts"]
+      },
+      {
+        "day": 14,
+        "topics": ["Parameter Efficient Fine-Tuning", "LoRA"],
+        "objectives": ["Fine-tuning concepts", "Adapters"]
+      },
+      {
+        "day": 15,
+        "topics": ["RLHF", "DPO"],
+        "objectives": ["Alignment and human feedback"]
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "name": "Chatbot Application Build",
+    "description": "Building RAG applications and conversational AI.",
+    "startDay": 16,
+    "endDay": 20,
+    "days": [
+      {
+        "day": 16,
+        "topics": ["RAG Architecture"],
+        "objectives": ["Retrieval-Augmented Generation pipeline"]
+      },
+      {
+        "day": 17,
+        "topics": ["LangChain Basics"],
+        "objectives": ["Chains", "Memory"]
+      },
+      {
+        "day": 18,
+        "topics": ["Advanced Retrieval", "Re-ranking"],
+        "objectives": ["Improving search quality"]
+      },
+      {
+        "day": 19,
+        "topics": ["Conversational Memory"],
+        "objectives": ["Managing context window"]
+      },
+      {
+        "day": 20,
+        "topics": ["Building UI with Streamlit/Gradio"],
+        "objectives": ["Prototyping chatbots"]
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "name": "Agentic AI & MCP",
+    "description": "Agents, tool use, and multi-agent frameworks.",
+    "startDay": 21,
+    "endDay": 24,
+    "days": [
+      {
+        "day": 21,
+        "topics": ["Agent Architectures", "ReAct"],
+        "objectives": ["Reasoning and acting loop"]
+      },
+      {
+        "day": 22,
+        "topics": ["Tool Use", "Function Calling"],
+        "objectives": ["Integrating external APIs"]
+      },
+      {
+        "day": 23,
+        "topics": ["Multi-Agent Systems", "AutoGen"],
+        "objectives": ["Collaborating agents"]
+      },
+      {
+        "day": 24,
+        "topics": ["Model Context Protocol (MCP)"],
+        "objectives": ["Standardizing AI tool interactions"]
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "name": "Evaluation, Security & Deployment",
+    "description": "Evaluating LLMs, securing applications, and productionizing.",
+    "startDay": 25,
+    "endDay": 28,
+    "days": [
+      {
+        "day": 25,
+        "topics": ["LLM Evaluation Metrics", "RAGAS"],
+        "objectives": ["Faithfulness", "Answer Relevance"]
+      },
+      {
+        "day": 26,
+        "topics": ["LLM Security", "Prompt Injection"],
+        "objectives": ["Defending against adversarial attacks", "Jailbreaks"]
+      },
+      {
+        "day": 27,
+        "topics": ["LLMOps", "Observability"],
+        "objectives": ["Monitoring generation", "Tracing"]
+      },
+      {
+        "day": 28,
+        "topics": ["Deployment", "FastAPI / Vercel"],
+        "objectives": ["Serving models in production"]
+      }
+    ]
+  },
+  {
+    "id": 8,
+    "name": "Production & Capstone",
+    "description": "Final project building and scaling AI apps.",
+    "startDay": 29,
+    "endDay": 31,
+    "days": [
+      {
+        "day": 29,
+        "topics": ["Scaling AI Systems", "Caching"],
+        "objectives": ["Reducing latency", "Semantic Caching"]
+      },
+      {
+        "day": 30,
+        "topics": ["Capstone Project Integration"],
+        "objectives": ["Combining all skills"]
+      },
+      {
+        "day": 31,
+        "topics": ["Final Presentations", "Next Steps"],
+        "objectives": ["Showcase", "Career prep"]
+      }
+    ]
+  }
+]
