@@ -2,9 +2,8 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { z } from 'zod';
 import { CandidateTheory, QuestionStrategy, QuestionType, QuestionDifficulty, EvaluationSignal } from './types';
 
-// Mock mode flag
 const useMock = !process.env.GEMINI_API_KEY;
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || 'mock_key');
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || 'missing_key');
 // Use latest flash
 const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' });
 
@@ -32,10 +31,7 @@ export async function generateQuestion(
   questionType: QuestionType
 ): Promise<GeneratedQuestion> {
   if (useMock) {
-    return {
-      question: `(MOCK) This is a ${difficulty} ${questionType} question for module ${targetModuleId}, day ${targetDay} targeting ${strategy}.`,
-      assessmentGoal: `Assess ability in module ${targetModuleId}`
-    };
+    throw new Error("Unable to continue the interview. Please retry.");
   }
 
   const prompt = `
@@ -82,12 +78,7 @@ export async function evaluateAnswer(
   targetModuleId: number
 ): Promise<EvaluationResult> {
   if (useMock) {
-    return {
-      signal: 'positive',
-      reasoning: '(MOCK) The candidate provided a reasonable answer.',
-      answerSummary: '(MOCK) Answered well.',
-      affectedDimensions: ['reasoning']
-    };
+    throw new Error("Unable to continue the interview. Please retry.");
   }
 
   const prompt = `
@@ -128,12 +119,7 @@ export async function evaluateAnswer(
 
 export async function generateFeedback(theory: CandidateTheory) {
   if (useMock) {
-    return {
-      summary: "(MOCK) Good overall performance.",
-      strengths: ["(MOCK) Python basics", "(MOCK) Quick learner"],
-      gaps: ["(MOCK) RAG nuances"],
-      next: ["(MOCK) Study advanced retrieval"]
-    };
+    throw new Error("Unable to continue the interview. Please retry.");
   }
 
   const prompt = `

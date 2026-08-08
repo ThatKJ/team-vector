@@ -11,7 +11,7 @@ import { AnswerBubble } from "@/components/intervu/AnswerBubble";
 import { TypingIndicator } from "@/components/intervu/TypingIndicator";
 import { apiClient } from "@/lib/api-client";
 import { InterviewTurn } from "@/lib/types";
-import { Info, MessageSquare, LayoutDashboard } from "lucide-react";
+import { Info, MessageSquare, LayoutDashboard, AlertCircle } from "lucide-react";
 
 interface ChatMessage {
   role: "interviewer" | "candidate";
@@ -27,24 +27,34 @@ export default function InterviewPage() {
   const [currentTurn, setCurrentTurn] = useState<InterviewTurn | null>(null);
   const [answerInput, setAnswerInput] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState(0); 
   const [activeTab, setActiveTab] = useState<"chat" | "context" | "eval">("chat");
   
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    let mounted = true;
     const init = async () => {
-      const initialTurn = {
-        turn_id: "turn_1",
-        question: "Based on your recent work with Vector Databases in the AI Cohort, how would you design a retrieval system to handle a million embeddings while keeping latency under 50ms?",
-        topic: "Vector Search",
-        turn_number: 1
-      };
-      setCurrentTurn(initialTurn);
-      setChat([{ role: "interviewer", text: initialTurn.question }]);
-      setProgress(1);
+      try {
+        const res = await apiClient.startInterview(id);
+        if (mounted) {
+          setCurrentTurn(res.first_turn);
+          setChat([{ role: "interviewer", text: res.first_turn.question }]);
+          setProgress(1);
+        }
+      } catch (err: any) {
+        console.error(err);
+        if (mounted) {
+          setError(err.message || "Unable to continue the interview. Please retry.");
+        }
+      } finally {
+        if (mounted) setIsInitializing(false);
+      }
     };
     init();
+    return () => { mounted = false; };
   }, [id]);
 
   useEffect(() => {
@@ -74,8 +84,9 @@ export default function InterviewPage() {
         setProgress(prev => Math.min(prev + 1, 8));
         setChat(prev => [...prev, { role: "interviewer", text: res.next_turn!.question }]);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      setError(err.message || "Unable to continue the interview. Please retry.");
     } finally {
       setIsProcessing(false);
     }
@@ -176,15 +187,30 @@ export default function InterviewPage() {
           </div>
 
           <div className="flex-1 overflow-y-auto p-4 lg:p-6 scroll-smooth bg-[var(--color-surface)]">
-            {chat.map((msg, idx) => (
-              msg.role === "interviewer" ? (
-                <QuestionBubble key={idx} text={msg.text} />
-              ) : (
-                <AnswerBubble key={idx} text={msg.text} />
-              )
-            ))}
-            {isProcessing && <TypingIndicator text="Evaluating reasoning..." />}
-            <div ref={bottomRef} />
+            {isInitializing ? (
+              <div className="flex flex-col items-center justify-center h-full text-[var(--color-muted-foreground)]">
+                <div className="h-4 w-4 rounded-full bg-[var(--color-primary)] animate-ping mb-4" />
+                <p className="text-sm font-medium animate-pulse">Connecting to INTERVU engine...</p>
+              </div>
+            ) : error ? (
+              <div className="flex flex-col items-center justify-center h-full text-red-500">
+                <AlertCircle className="w-8 h-8 mb-2" />
+                <p className="text-sm font-medium">{error}</p>
+                <Button variant="outline" size="sm" className="mt-4" onClick={() => window.location.reload()}>Retry</Button>
+              </div>
+            ) : (
+              <>
+                {chat.map((msg, idx) => (
+                  msg.role === "interviewer" ? (
+                    <QuestionBubble key={idx} text={msg.text} />
+                  ) : (
+                    <AnswerBubble key={idx} text={msg.text} />
+                  )
+                ))}
+                {isProcessing && <TypingIndicator text="Evaluating reasoning..." />}
+                <div ref={bottomRef} />
+              </>
+            )}
           </div>
 
           <div className="p-3 lg:p-4 bg-[var(--color-background)] lg:border-t border-[var(--color-border)] shadow-[0_-4px_16px_rgba(0,0,0,0.05)] lg:shadow-none">
@@ -194,6 +220,7 @@ export default function InterviewPage() {
                 placeholder="Type your response..."
                 value={answerInput}
                 onChange={e => setAnswerInput(e.target.value)}
+                disabled={isInitializing || !!error}
                 onKeyDown={e => {
                   if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
                     handleSubmit();
@@ -201,7 +228,7 @@ export default function InterviewPage() {
                 }}
               />
               <div className="absolute bottom-3 right-3 flex gap-2 items-center">
-                <Button size="sm" onClick={handleSubmit} disabled={isProcessing || !answerInput.trim()}>
+                <Button size="sm" onClick={handleSubmit} disabled={isProcessing || !answerInput.trim() || isInitializing || !!error}>
                   Submit
                 </Button>
               </div>

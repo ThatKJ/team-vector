@@ -40,7 +40,10 @@ class ApiClient {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ sessionId: candidateId, candidate: { id: candidateId } })
     });
-    if (!res.ok) throw new Error("Failed to start interview");
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || "Failed to start interview");
+    }
     const data = await res.json();
     
     // Map backend format to frontend format
@@ -86,7 +89,10 @@ class ApiClient {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ sessionId: interviewId, message: payload.answer })
     });
-    if (!res.ok) throw new Error("Failed to submit answer");
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || "Failed to submit answer");
+    }
     const data = await res.json();
 
     if (data.done) {

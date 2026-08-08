@@ -27,16 +27,10 @@ function SetupContent() {
     }
   }, [candidateId]);
 
-  const handleStart = async () => {
+  const handleStart = () => {
     if (!candidateId) return;
     setStarting(true);
-    try {
-      const res = await apiClient.startInterview(candidateId);
-      router.push(`/interview/${res.interview_id}`);
-    } catch (err) {
-      console.error(err);
-      setStarting(false);
-    }
+    router.push(`/interview/${candidateId}`);
   };
 
   if (!candidate) {
