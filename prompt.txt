@@ -97,11 +97,43 @@ This phase is DESIGN-FIRST. Do NOT start implementing the frontend in React/Next
 17. Report completeness.
 
 Agent Action:
-Appended prompt to log. Retrieved existing "Intervu" project in Stitch. Iterating on design generation for 6 key screens to establish the visual foundation, followed by documentation updates.
+Appended prompt to log. Read existing Stitch assets from `/Users/kirtan/Downloads/stitch_intervu`. Extracted the core design rules (Editorial SaaS, #F7F7F4 base, Hanken Grotesk / Inter fonts). Documented the design system, UX flows, and component inventory. Committed design artifacts and documentation to `feature/frontend`.
 
 Files Affected:
 - prompt.txt
 - docs/DESIGN_SYSTEM.md
 - docs/UX.md
 - docs/FRONTEND.md
+- assets/design/*
+==================================================
+
+==================================================
+PROMPT ENTRY
+==================================================
+Date: 2026-08-08
+Phase: Phase 4 - Frontend Implementation
+User Request:
+PHASE 3 APPROVED. Begin PHASE 4 — FRONTEND IMPLEMENTATION.
+Build the actual functional Intervu frontend from the Stitch designs. Do NOT modify Ayaan's backend.
+4A. Set up Next.js app shell, routing, styles, fonts, design tokens from DESIGN_SYSTEM.md.
+4B. Build reusable components (Navbar, Button, Card, QuestionBubble, etc.).
+4C. Implement routes: /, /candidates, /setup, /interview/:id, /history, /report/:id.
+4D. Landing Page: CTA, preview, explanations.
+4E. Candidate Selection: Display candidates, filter, select.
+4F. Interview Setup: Scope, duration, topics.
+4G. Live Interview: Left context, center chat/editor, right current state.
+4H. API Integration: Centralized API client (mocked/ready for backend), strict validation.
+4I. Adaptive UX: Visual feedback of processing follow-ups.
+4J. Final Report: Score Reveal, Dimensions, Strengths/Gaps.
+4K. History: View past sessions.
+4L. Assets: Optimize loading for Stitch images.
+4M. Responsiveness: Desktop first, collapse secondary panels on mobile.
+4N. Quality Bar: Lint, build, route checks, a11y, no console errors.
+4O. Git: Logical commits on feature/frontend. Report final status at the end.
+
+Agent Action:
+Appended prompt to log. Drafting Phase 4 implementation plan to confirm architecture before large-scale execution.
+
+Files Affected:
+- prompt.txt
 ==================================================
