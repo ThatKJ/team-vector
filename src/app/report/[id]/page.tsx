@@ -42,7 +42,7 @@ export default function ReportPage() {
     );
   }
 
-  const verdictText = report.score > 80 ? "STRONG HIRE" : report.score > 65 ? "HIRE" : report.score > 50 ? "BORDERLINE" : "NEEDS DEVELOPMENT";
+  const verdictText = (report.score ?? 0) > 80 ? "STRONG HIRE" : (report.score ?? 0) > 65 ? "HIRE" : (report.score ?? 0) > 50 ? "BORDERLINE" : "NEEDS DEVELOPMENT";
 
   return (
     <div className="min-h-screen flex flex-col font-sans bg-[#FAFAFA] dark:bg-[#0A0A0A]">
@@ -65,7 +65,7 @@ export default function ReportPage() {
           {/* OVERALL ASSESSMENT */}
           <div className="flex flex-col items-center justify-center mb-12 space-y-3">
             <span className="text-xs font-bold uppercase tracking-[0.25em] text-[var(--color-muted-foreground)]">Overall Assessment</span>
-            <span className="text-7xl font-black font-heading tracking-tighter text-[var(--color-foreground)]">{report.score}</span>
+            <span className="text-7xl font-black font-heading tracking-tighter text-[var(--color-foreground)]">{report.score ?? 0}</span>
             <span className="text-sm font-bold uppercase tracking-[0.3em] text-[var(--color-primary)] bg-[var(--color-primary)]/10 px-4 py-1 rounded-sm">
               {verdictText}
             </span>
@@ -77,78 +77,87 @@ export default function ReportPage() {
           <div className="flex flex-col gap-8 mb-12">
             <div className="flex flex-col gap-2">
               <span className="text-xs font-bold uppercase tracking-widest text-[var(--color-foreground)]">Technical Strengths</span>
-              <BlockyProgress percent={report.score + 5 > 100 ? 100 : report.score + 5} />
+              <BlockyProgress percent={(report.score || 0) + 5 > 100 ? 100 : (report.score || 0) + 5} />
             </div>
             <div className="flex flex-col gap-2">
               <span className="text-xs font-bold uppercase tracking-widest text-[var(--color-foreground)]">Areas to Develop</span>
-              <BlockyProgress percent={100 - report.score} />
+              <BlockyProgress percent={100 - (report.score || 0)} />
             </div>
           </div>
 
           <hr className="border-t-[3px] border-[var(--color-foreground)] mb-12 opacity-90" />
 
           {/* Assessment Breakdown */}
-          <div className="mb-12">
-            <span className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--color-muted-foreground)] block mb-6">Assessment Breakdown</span>
-            <div className="flex flex-col gap-4 font-mono text-sm">
-              <div className="flex justify-between border-b border-[var(--color-border)] border-dashed pb-2">
-                <span className="text-[var(--color-foreground)]">Problem Solving</span>
-                <span className="font-bold">{report.categories.problem_solving}</span>
+          {report.categories && (
+            <>
+              <div className="mb-12">
+                <span className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--color-muted-foreground)] block mb-6">Assessment Breakdown</span>
+                <div className="flex flex-col gap-4 font-mono text-sm">
+                  <div className="flex justify-between border-b border-[var(--color-border)] border-dashed pb-2">
+                    <span className="text-[var(--color-foreground)]">Problem Solving</span>
+                    <span className="font-bold">{report.categories.problem_solving ?? 'N/A'}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-[var(--color-border)] border-dashed pb-2">
+                    <span className="text-[var(--color-foreground)]">Systems Thinking</span>
+                    <span className="font-bold">{report.categories.systems_thinking ?? 'N/A'}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-[var(--color-border)] border-dashed pb-2">
+                    <span className="text-[var(--color-foreground)]">Technical Depth</span>
+                    <span className="font-bold">{report.categories.technical_depth ?? 'N/A'}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-[var(--color-border)] border-dashed pb-2">
+                    <span className="text-[var(--color-foreground)]">Communication</span>
+                    <span className="font-bold">{report.categories.communication ?? 'N/A'}</span>
+                  </div>
+                </div>
               </div>
-              <div className="flex justify-between border-b border-[var(--color-border)] border-dashed pb-2">
-                <span className="text-[var(--color-foreground)]">Systems Thinking</span>
-                <span className="font-bold">{report.categories.systems_thinking}</span>
-              </div>
-              <div className="flex justify-between border-b border-[var(--color-border)] border-dashed pb-2">
-                <span className="text-[var(--color-foreground)]">Technical Depth</span>
-                <span className="font-bold">{report.categories.technical_depth}</span>
-              </div>
-              <div className="flex justify-between border-b border-[var(--color-border)] border-dashed pb-2">
-                <span className="text-[var(--color-foreground)]">Communication</span>
-                <span className="font-bold">{report.categories.communication}</span>
-              </div>
-            </div>
-          </div>
-
-          <hr className="border-t-[3px] border-[var(--color-foreground)] mb-12 opacity-90" />
+              <hr className="border-t-[3px] border-[var(--color-foreground)] mb-12 opacity-90" />
+            </>
+          )}
 
           {/* INTERVIEW INSIGHTS */}
           <div className="mb-16">
             <span className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--color-muted-foreground)] block mb-8">Interview Insights</span>
             
             <div className="space-y-10">
-              <div>
-                <h3 className="text-sm font-bold uppercase tracking-widest text-[var(--color-foreground)] mb-4">What they demonstrated</h3>
-                <ul className="space-y-2 list-none pl-0 text-sm leading-relaxed text-[var(--color-muted-foreground)]">
-                  {report.evidence.strengths.map((str, idx) => (
-                    <li key={idx} className="flex gap-3">
-                      <span className="text-[var(--color-primary)]">›</span> {str}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              {report.evidence?.strengths && report.evidence.strengths.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-bold uppercase tracking-widest text-[var(--color-foreground)] mb-4">What they demonstrated</h3>
+                  <ul className="space-y-2 list-none pl-0 text-sm leading-relaxed text-[var(--color-muted-foreground)]">
+                    {report.evidence.strengths.map((str, idx) => (
+                      <li key={idx} className="flex gap-3">
+                        <span className="text-[var(--color-primary)]">›</span> {str}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
-              <div>
-                <h3 className="text-sm font-bold uppercase tracking-widest text-[var(--color-foreground)] mb-4">Where they struggled</h3>
-                <ul className="space-y-2 list-none pl-0 text-sm leading-relaxed text-[var(--color-muted-foreground)]">
-                  {report.evidence.gaps.map((gap, idx) => (
-                    <li key={idx} className="flex gap-3">
-                      <span className="text-red-500">›</span> {gap}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              {report.evidence?.gaps && report.evidence.gaps.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-bold uppercase tracking-widest text-[var(--color-foreground)] mb-4">Where they struggled</h3>
+                  <ul className="space-y-2 list-none pl-0 text-sm leading-relaxed text-[var(--color-muted-foreground)]">
+                    {report.evidence.gaps.map((gap, idx) => (
+                      <li key={idx} className="flex gap-3">
+                        <span className="text-red-500">›</span> {gap}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
-              <div>
-                <h3 className="text-sm font-bold uppercase tracking-widest text-[var(--color-foreground)] mb-4">Recommended next steps</h3>
-                <ul className="space-y-2 list-none pl-0 text-sm leading-relaxed text-[var(--color-foreground)]">
-                  {report.next_steps.map((step, idx) => (
-                    <li key={idx} className="flex gap-3">
-                      <span className="font-mono text-xs opacity-50 mt-0.5">{String(idx + 1).padStart(2, '0')}</span> {step}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              {report.next_steps && report.next_steps.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-bold uppercase tracking-widest text-[var(--color-foreground)] mb-4">Recommended next steps</h3>
+                  <ul className="space-y-2 list-none pl-0 text-sm leading-relaxed text-[var(--color-foreground)]">
+                    {report.next_steps.map((step, idx) => (
+                      <li key={idx} className="flex gap-3">
+                        <span className="font-mono text-xs opacity-50 mt-0.5">{String(idx + 1).padStart(2, '0')}</span> {step}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           </div>
 
