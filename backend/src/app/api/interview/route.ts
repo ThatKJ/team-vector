@@ -4,6 +4,7 @@ import { determineNextStrategy, planNextQuestion, determineRoundAndCompletion } 
 import { generateQuestion, evaluateAnswer, generateFeedback } from '@/lib/gemini';
 import { updateTheory, adjustDifficulty } from '@/lib/theoryEngine';
 import { supabase } from '@/lib/supabase';
+import { getCandidate, getCandidateProgress } from '@/lib/db';
 
 export async function POST(request: Request) {
   try {
@@ -21,7 +22,22 @@ export async function POST(request: Request) {
       if (session) {
         return NextResponse.json({ error: 'Session already started' }, { status: 400 });
       }
-      session = createSession(sessionId, candidate);
+
+      // Reconstruct full candidate from DB
+      const dbCandidate = await getCandidate(candidate.id);
+      const progress = await getCandidateProgress(candidate.id);
+      
+      const fullCandidate = {
+        ...dbCandidate,
+        missions: progress.map((p: any) => ({
+          id: p.topic_id,
+          name: p.curriculum_topics?.topic_name || 'Mission',
+          status: p.status.toLowerCase(),
+          attempts: p.attempts
+        }))
+      };
+
+      session = createSession(sessionId, fullCandidate);
       
       const { targetModule, targetDay, questionType } = planNextQuestion(session.theory, session.currentStrategy);
       const generated = await generateQuestion(
