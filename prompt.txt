@@ -1,0 +1,70 @@
+==================================================
+PROMPT ENTRY
+==================================================
+Date: 2026-08-08
+Phase: Phase 1 - Documentation
+User Request:
+/goal MASTER GOAL — INTERVU / VICODATHON
+You are the lead engineering agent for a completely fresh rebuild of Intervu, the AI technical interview platform for the Vicodathon hackathon. The previous implementation has been intentionally deleted. DO NOT recreate the previous frontend. We are starting from a clean repository and building the product properly from the ground up.
+
+[Core Instructions]
+- Inspect repository and MCP tools.
+- Create complete documentation (PRD, Architecture, Database Model, API Contracts, Git Workflow).
+- Create prompt.txt for append-only prompt history.
+- Setup Git workflow with branches main, dev, feature/frontend, feature/backend, feature/integration.
+- Stop and wait for approval after Phase 1.
+
+Agent Action:
+Inspected repository state, confirmed clean slate setup. Verified available MCP tools (Stitch, Supabase, Breeth). Created the core documentation files as requested (PRD, ARCHITECTURE, DATABASE, API, GIT_WORKFLOW) and the append-only prompt.txt log. Prepared initial branch structure plan for Git.
+
+Files Affected:
+- prompt.txt
+- docs/PRD.md
+- docs/ARCHITECTURE.md
+- docs/DATABASE.md
+- docs/API.md
+- docs/GIT_WORKFLOW.md
+- Other supporting doc files.
+==================================================
+
+==================================================
+PROMPT ENTRY
+==================================================
+Date: 2026-08-08
+Phase: Phase 2 - Git Foundation
+User Request:
+PHASE 1 APPROVED. Proceed to PHASE 2 — Git Foundation.
+The clean-slate reset is intentional. The deleted previous repository files are expected and should NOT be restored.
+Before committing:
+1. Verify the repository contains: docs/, prompt.txt, README/documentation, .gitignore, .env.example if applicable
+2. Verify NO secrets are present.
+3. Verify the remote: https://github.com/ThatKJ/team-vector-vicodathon.git
+4. Verify branches: main, dev, feature/frontend, feature/backend, feature/integration
+5. Review git diff carefully.
+6. Create the clean-slate baseline commit.
+Use a clear commit message such as: chore: establish clean slate and project foundation
+7. Push main to the configured GitHub remote.
+8. Verify the push succeeded.
+9. After pushing, switch to dev.
+10. Do NOT begin frontend implementation yet.
+11. Do NOT begin Stitch design yet.
+12. Do NOT modify Ayaan's backend.
+After Phase 2 is complete, STOP and report:
+- commit hash
+- current branch
+- remote
+- push status
+- branch list
+- git status
+- files committed
+- whether any secrets were detected
+- exact next recommended phase
+
+Agent Action:
+Verified repository state and remote URL. Checked for secrets (none found). Created `.gitignore` and `.env.example`. Staged all intentional deletions and newly created documentation files. Committed to `main` with "chore: establish clean slate and project foundation" and pushed to remote. Switched to `dev` branch.
+
+Files Affected:
+- prompt.txt
+- .gitignore
+- .env.example
+==================================================
