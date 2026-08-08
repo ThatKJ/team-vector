@@ -134,7 +134,7 @@ export default function InterviewPage() {
                 <h2 className="text-[13px] font-bold uppercase tracking-[0.2em] text-[var(--color-foreground)]">Unable to Start Assessment</h2>
                 <p className="text-sm text-[var(--color-muted-foreground)] opacity-90">{error}</p>
               </div>
-              <Button variant="outline" size="sm" className="mt-8 uppercase tracking-widest text-[11px] font-bold px-8 h-10" onClick={() => window.location.reload()}>Retry Connection</Button>
+              <Button variant="secondary" size="sm" className="mt-8 uppercase tracking-widest text-[11px] font-bold px-8 h-10" onClick={() => window.location.reload()}>Retry Connection</Button>
             </div>
           </div>
         ) : (
@@ -222,3 +222,7 @@ export default function InterviewPage() {
             </div>
           </>
         )}
+      </main>
+    </div>
+  );
+}
