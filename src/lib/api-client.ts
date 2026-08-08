@@ -9,7 +9,7 @@ const MOCK_CANDIDATES: Candidate[] = [
 
 class ApiClient {
   private baseUrl = process.env.NEXT_PUBLIC_API_URL || "/api";
-  private useMock = process.env.NEXT_PUBLIC_USE_MOCK === "true" || true; // Default to true for Phase 4
+  private useMock = process.env.NEXT_PUBLIC_USE_MOCK !== "false";
 
   async getCandidates(): Promise<Candidate[]> {
     if (this.useMock) {
@@ -47,8 +47,8 @@ class ApiClient {
   async submitAnswer(interviewId: string, payload: SubmitAnswerRequest): Promise<SubmitAnswerResponse> {
     if (this.useMock) {
       await new Promise(r => setTimeout(r, 2000));
-      // Simulate completing after 3 turns for the hackathon UI test
-      const isComplete = payload.turn_id === "turn_3";
+      const currentTurn = parseInt(payload.turn_id.split("_")[1] || "1");
+      const isComplete = currentTurn >= 8;
       
       if (isComplete) {
         return {
@@ -61,10 +61,10 @@ class ApiClient {
         evaluation_status: "processed",
         is_complete: false,
         next_turn: {
-          turn_id: `turn_${Date.now()}`,
+          turn_id: `turn_${currentTurn + 1}`,
           question: "That makes sense. But what are the memory tradeoffs of HNSW compared to IVF when updating the index frequently?",
           topic: "Vector Search (Deep Dive)",
-          turn_number: parseInt(payload.turn_id.split("_")[1] || "1") + 1
+          turn_number: currentTurn + 1
         }
       };
     }
@@ -82,26 +82,32 @@ class ApiClient {
     if (this.useMock) {
       await new Promise(r => setTimeout(r, 1500));
       return {
-        score: 86,
+        score: 87,
         categories: {
-          problem_solving: 90,
+          problem_solving: 92,
           systems_thinking: 85,
-          technical_depth: 80,
-          communication: 90
+          technical_depth: 88,
+          communication: 82
         },
         evidence: {
           strengths: [
-            "Strong understanding of indexing tradeoffs.",
-            "Communicates architectural decisions clearly.",
-            "Aware of memory constraints in HNSW."
+            "Demonstrated deep understanding of HNSW index trade-offs.",
+            "Clear separation of concerns in proposed RAG architecture.",
+            "Proactively identified cold-start latency issues in serverless endpoints."
           ],
           gaps: [
-            "Missed edge cases in high-concurrency environments.",
-            "Could elaborate more on distributed consensus for vector sync."
+            "Missed edge cases around concurrent document updates.",
+            "Did not fully articulate the security boundaries for multi-tenant retrieval."
           ]
         },
-        next_steps: ["Deep dive into concurrent system design.", "Explore distributed vector architectures."],
-        decision_trace: []
+        next_steps: [
+          "Review concurrency models in distributed systems (AI Cohort Day 12).",
+          "Practice communicating security constraints in architectural designs."
+        ],
+        decision_trace: [
+          { turn: 1, signal: "strong system design", weight: 0.8 },
+          { turn: 4, signal: "missed edge case", weight: -0.3 }
+        ]
       };
     }
     

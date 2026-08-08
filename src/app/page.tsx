@@ -13,18 +13,17 @@ export default function LandingPage() {
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="mx-auto max-w-2xl text-center">
               <h1 className="font-heading text-5xl font-bold tracking-tight text-[var(--color-foreground)] sm:text-7xl">
-                Know how someone engineers.
+                The AI technical interviewer that understands what you actually learned.
               </h1>
               <p className="mt-8 text-lg leading-8 text-[var(--color-muted-foreground)]">
-                Your cohort built the knowledge. <strong>INTERVU</strong> tests whether you can explain it.
-                Adaptive technical interviews based on a candidate&apos;s actual 31-day AI Cohort learning journey.
+                Your interview is generated from the candidate&apos;s actual cohort journey, completed missions, learning signals and technical curriculum.
               </p>
               <div className="mt-10 flex items-center justify-center gap-x-6">
                 <Link href="/candidates">
-                  <Button size="lg">Start assessment &rarr;</Button>
+                  <Button size="lg">Start Interview</Button>
                 </Link>
-                <Link href="#how-it-works">
-                  <Button variant="ghost" size="lg">See how it works</Button>
+                <Link href="/history">
+                  <Button variant="secondary" size="lg">See how it works</Button>
                 </Link>
               </div>
             </div>

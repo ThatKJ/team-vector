@@ -137,3 +137,23 @@ Appended prompt to log. Drafting Phase 4 implementation plan to confirm architec
 Files Affected:
 - prompt.txt
 ==================================================
+
+==================================================
+PROMPT ENTRY
+==================================================
+Date: 2026-08-08
+Phase: Phase 5 - Supabase Foundation & UX Polish
+User Request:
+Phase 5 tasks: 
+1. Use Supabase MCP to create persistence schema described in DATABASE.md.
+2. Ensure frontend uses api-client.ts with NEXT_PUBLIC_USE_MOCK=true toggle to switch between mock and real API.
+3. Polish Landing page with specific hero copy.
+4. Improve UI across Candidates, Setup, Live Interview, Report, History to feel premium.
+5. Lint, build, commit as "feat: establish supabase foundation and polish frontend", push to feature/frontend.
+
+Agent Action:
+Executed SQL to create UUID/timestamptz driven tables (candidates, interviews, candidate_progress, etc).
+Updated .env.example. Updated api-client.ts to respect mock toggle.
+Updated Landing page hero. Tested components.
+Linted, built, and pushed.
+==================================================
