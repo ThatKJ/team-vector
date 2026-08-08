@@ -1,0 +1,62 @@
+[
+  {
+    "id": "CAND-003",
+    "name": "Emily Chen",
+    "role": "AI Engineer",
+    "experienceLevel": "Mid-Level",
+    "missions": [
+      { "id": "m1", "name": "Basic Python Setup", "status": "passed", "attempts": 1 },
+      { "id": "m2", "name": "Vector DB Setup", "status": "passed", "attempts": 1 },
+      { "id": "m3", "name": "RAG Implementation", "status": "passed", "attempts": 2 },
+      { "id": "m4", "name": "Agentic Tool Use", "status": "passed", "attempts": 1 }
+    ]
+  },
+  {
+    "id": "CAND-010",
+    "name": "Gerald Combs",
+    "role": "IT Support Specialist",
+    "experienceLevel": "Junior",
+    "missions": [
+      { "id": "m1", "name": "Basic Python Setup", "status": "passed", "attempts": 3 },
+      { "id": "m2", "name": "Vector DB Setup", "status": "failed", "attempts": 4 },
+      { "id": "m3", "name": "RAG Implementation", "status": "skipped", "attempts": 0 },
+      { "id": "m4", "name": "Agentic Tool Use", "status": "failed", "attempts": 2 }
+    ]
+  },
+  {
+    "id": "CAND-017",
+    "name": "Tyler Brooks",
+    "role": "Junior Developer",
+    "experienceLevel": "Junior",
+    "missions": [
+      { "id": "m1", "name": "Basic Python Setup", "status": "passed", "attempts": 2 },
+      { "id": "m2", "name": "Vector DB Setup", "status": "passed", "attempts": 3 },
+      { "id": "m3", "name": "RAG Implementation", "status": "passed", "attempts": 4 },
+      { "id": "m4", "name": "Agentic Tool Use", "status": "failed", "attempts": 5 }
+    ]
+  },
+  {
+    "id": "CAND-004",
+    "name": "David Miller",
+    "role": "Business Analyst",
+    "experienceLevel": "Entry-Level",
+    "missions": [
+      { "id": "m1", "name": "Basic Python Setup", "status": "passed", "attempts": 2 },
+      { "id": "m2", "name": "Vector DB Setup", "status": "skipped", "attempts": 0 },
+      { "id": "m3", "name": "RAG Implementation", "status": "skipped", "attempts": 0 },
+      { "id": "m4", "name": "Agentic Tool Use", "status": "skipped", "attempts": 0 }
+    ]
+  },
+  {
+    "id": "CAND-008",
+    "name": "Harold Whitfield",
+    "role": "Distinguished Engineer",
+    "experienceLevel": "Expert",
+    "missions": [
+      { "id": "m1", "name": "Basic Python Setup", "status": "passed", "attempts": 1 },
+      { "id": "m2", "name": "Vector DB Setup", "status": "passed", "attempts": 1 },
+      { "id": "m3", "name": "RAG Implementation", "status": "failed", "attempts": 2 },
+      { "id": "m4", "name": "Agentic Tool Use", "status": "skipped", "attempts": 0 }
+    ]
+  }
+]
