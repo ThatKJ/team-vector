@@ -8,8 +8,8 @@ const MOCK_CANDIDATES: Candidate[] = [
 ];
 
 class ApiClient {
-  private baseUrl = process.env.NEXT_PUBLIC_API_URL || "/api";
-  private useMock = process.env.NEXT_PUBLIC_USE_MOCK !== "false";
+  private baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3001/api";
+  private useMock = process.env.NEXT_PUBLIC_USE_MOCK === "true";
 
   async getCandidates(): Promise<Candidate[]> {
     if (this.useMock) {
