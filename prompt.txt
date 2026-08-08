@@ -68,3 +68,40 @@ Files Affected:
 - .gitignore
 - .env.example
 ==================================================
+
+==================================================
+PROMPT ENTRY
+==================================================
+Date: 2026-08-08
+Phase: Phase 3 - Stitch Design & Asset Discovery
+User Request:
+PHASE 3 — STITCH DESIGN + ASSET DISCOVERY
+PHASE 2 IS APPROVED. Now begin PHASE 3.
+This phase is DESIGN-FIRST. Do NOT start implementing the frontend in React/Next.js yet.
+1. Use Stitch MCP to create the complete visual direction for INTERV (Landing, Setup, Interview Room, Follow-up, Completion, Final Report). Iterate if it looks generic.
+2. Use assets purposefully (subtle technical illustrations).
+3. Core Visual Direction: Light UI, warm/cool off-white canvas, depth through typography/spacing/borders/composition. Premium editorial + modern tooling aesthetic.
+4. Brand Feel: Intelligent, precise, technical, confident, calm, premium, human.
+5. Create screens: Landing Page, Candidate Setup, Interview Room, Follow-up Moment, Interview Completion, Final Report.
+6. Motion: Purposeful, subtle.
+7. Typography: Strong modern hierarchy, editorial headlines + compact technical metadata.
+8. Color: Off-white background, deep neutral text, one sophisticated accent (e.g. electric blue/emerald).
+9. Layout: Open layouts, asymmetric, full-width sections.
+10. Establish Design System: Update docs.
+11. Identify reusable components.
+12. Evaluate and iterate in Stitch.
+13. Prioritize desktop responsiveness.
+14. Document in DESIGN_SYSTEM.md, UX.md, FRONTEND.md.
+15. DO NOT IMPLMENT YET.
+16. Git: Work from dev, commit to design/frontend branch.
+17. Report completeness.
+
+Agent Action:
+Appended prompt to log. Retrieved existing "Intervu" project in Stitch. Iterating on design generation for 6 key screens to establish the visual foundation, followed by documentation updates.
+
+Files Affected:
+- prompt.txt
+- docs/DESIGN_SYSTEM.md
+- docs/UX.md
+- docs/FRONTEND.md
+==================================================
