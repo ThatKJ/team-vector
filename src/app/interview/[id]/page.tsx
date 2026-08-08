@@ -2,16 +2,10 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Navbar } from "@/components/ui/Navbar";
 import { Button } from "@/components/ui/Button";
-import { Card, CardContent } from "@/components/ui/Card";
-import { Progress } from "@/components/ui/Progress";
-import { QuestionBubble } from "@/components/intervu/QuestionBubble";
-import { AnswerBubble } from "@/components/intervu/AnswerBubble";
-import { TypingIndicator } from "@/components/intervu/TypingIndicator";
 import { apiClient } from "@/lib/api-client";
 import { InterviewTurn } from "@/lib/types";
-import { Info, MessageSquare, LayoutDashboard, AlertCircle } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 
 interface ChatMessage {
   role: "interviewer" | "candidate";
@@ -96,155 +90,119 @@ export default function InterviewPage() {
     }
   };
 
-  const contextPanelContent = (
-    <Card className="flex-1 border-none lg:border-solid lg:border-[var(--color-border)] shadow-none lg:shadow-sm">
-      <CardContent className="pt-6">
-        <h3 className="text-sm font-semibold uppercase tracking-wider text-[var(--color-muted-foreground)] mb-4">Session Context</h3>
-        <div className="space-y-4">
-          <div>
-            <p className="text-xs text-[var(--color-muted-foreground)] mb-1">Candidate</p>
-            <p className="font-medium text-sm">Alex Chen</p>
-          </div>
-          <div>
-            <p className="text-xs text-[var(--color-muted-foreground)] mb-1">Focus Area</p>
-            <p className="font-medium text-sm">Backend Systems</p>
-          </div>
-          <div className="pt-4 border-t border-[var(--color-border)]">
-            <p className="text-xs text-[var(--color-muted-foreground)] mb-2">Curriculum Scope</p>
-            <ul className="text-sm space-y-2 text-[var(--color-foreground)]">
-              <li className="flex items-center gap-2"><div className="h-2 w-2 rounded-full bg-[var(--color-primary)]"/> Vector Search</li>
-              <li className="flex items-center gap-2"><div className="h-2 w-2 rounded-full bg-[var(--color-primary)]"/> System Design</li>
-              <li className="flex items-center gap-2"><div className="h-2 w-2 rounded-full bg-[var(--color-primary)]"/> RAG Optimization</li>
-            </ul>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-
-  const evalPanelContent = (
-    <Card className="flex-1 border-none lg:border-solid lg:border-[var(--color-border)] shadow-none lg:shadow-sm">
-      <CardContent className="pt-6">
-        <h3 className="text-sm font-semibold uppercase tracking-wider text-[var(--color-muted-foreground)] mb-4">Evaluation Context</h3>
-        
-        <div className="mb-6">
-          <div className="flex justify-between text-xs mb-2">
-            <span className="font-medium text-[var(--color-foreground)]">Interview Progress</span>
-            <span className="font-mono text-[var(--color-muted-foreground)]">{progress} / 8</span>
-          </div>
-          <Progress value={progress} max={8} />
-        </div>
-
-        <div className="space-y-4">
-          <div>
-            <p className="text-xs text-[var(--color-muted-foreground)] mb-1">Current Topic</p>
-            <p className="font-medium text-sm text-[var(--color-primary)]">{currentTurn?.topic || "Processing..."}</p>
-          </div>
-          <div className="pt-4 border-t border-[var(--color-border)]">
-            <p className="text-xs text-[var(--color-muted-foreground)] mb-1">Active Competency</p>
-            <p className="font-medium text-sm">System Design & Tradeoffs</p>
-          </div>
-          <div className="pt-4 border-t border-[var(--color-border)]">
-            <p className="text-xs text-[var(--color-muted-foreground)] mb-1">State</p>
-            <p className="font-mono text-xs text-amber-600 bg-amber-50 p-2 rounded">
-              {isProcessing ? "Evaluating reasoning..." : "Awaiting response..."}
-            </p>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
+  // Removed unused panel content for cleaner viewport
 
   return (
-    <div className="flex flex-col h-[100dvh] bg-[var(--color-background)]">
-      <Navbar />
+    <div className="flex flex-col h-[100dvh] bg-[var(--color-background)] font-sans">
       
-      {/* Mobile Tabs */}
-      <div className="lg:hidden flex border-b border-[var(--color-border)] bg-[var(--color-surface)] px-4">
-        <button onClick={() => setActiveTab("context")} className={`flex-1 py-3 text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2 ${activeTab === "context" ? "border-b-2 border-[var(--color-primary)] text-[var(--color-primary)]" : "text-[var(--color-muted-foreground)]"}`}>
-          <Info className="w-4 h-4" /> Context
-        </button>
-        <button onClick={() => setActiveTab("chat")} className={`flex-1 py-3 text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2 ${activeTab === "chat" ? "border-b-2 border-[var(--color-primary)] text-[var(--color-primary)]" : "text-[var(--color-muted-foreground)]"}`}>
-          <MessageSquare className="w-4 h-4" /> Interview
-        </button>
-        <button onClick={() => setActiveTab("eval")} className={`flex-1 py-3 text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2 ${activeTab === "eval" ? "border-b-2 border-[var(--color-primary)] text-[var(--color-primary)]" : "text-[var(--color-muted-foreground)]"}`}>
-          <LayoutDashboard className="w-4 h-4" /> Status
-        </button>
-      </div>
-
-      <main className="flex-1 overflow-hidden grid grid-cols-1 lg:grid-cols-12 gap-0 lg:gap-6 p-0 lg:p-6 lg:pb-8 max-w-[1920px] mx-auto w-full">
+      {/* Centered Assessment Viewport */}
+      <main className="flex-1 flex flex-col mx-auto w-full max-w-3xl bg-[var(--color-surface)] shadow-2xl relative overflow-hidden border-x border-[var(--color-border)]">
         
-        {/* Left Column: Context */}
-        <aside className={`${activeTab === "context" ? "flex" : "hidden"} lg:flex lg:col-span-3 flex-col gap-6 overflow-y-auto p-4 lg:p-0`}>
-          {contextPanelContent}
-        </aside>
+        {/* Sticky Header */}
+        <header className="flex items-center justify-between px-6 py-4 border-b border-[var(--color-border)] bg-[var(--color-surface)]/90 backdrop-blur z-20">
+          <div className="flex items-center gap-3">
+            <div className="h-2.5 w-2.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.6)]" />
+            <span className="font-semibold text-[13px] tracking-widest uppercase text-[var(--color-foreground)]">Live Assessment</span>
+          </div>
+          <div className="font-mono text-[13px] text-[var(--color-muted-foreground)] tabular-nums">
+            {progress > 0 ? `Turn ${progress}/8` : 'Starting...'}
+          </div>
+        </header>
 
-        {/* Center Column: Conversation */}
-        <section className={`${activeTab === "chat" ? "flex" : "hidden"} lg:flex col-span-1 lg:col-span-6 flex-col bg-[var(--color-surface)] lg:border lg:border-[var(--color-border)] lg:rounded-[24px] lg:shadow-sm overflow-hidden relative h-full max-h-full`}>
+        {/* Scrollable Conversation Area */}
+        <div className="flex-1 overflow-y-auto p-6 lg:p-10 scroll-smooth flex flex-col gap-8 bg-[#FDFDFD] dark:bg-[#121212]">
           
-          <div className="hidden lg:flex px-6 py-4 border-b border-[var(--color-border)] justify-between items-center bg-[var(--color-surface)]/80 backdrop-blur z-10">
-             <div className="flex items-center gap-3">
-               <div className="h-2 w-2 rounded-full bg-[var(--color-primary)] animate-pulse" />
-               <span className="font-semibold text-sm">Live Assessment</span>
-             </div>
-             <span className="font-mono text-xs text-[var(--color-muted-foreground)]">00:14:23</span>
-          </div>
-
-          <div className="flex-1 overflow-y-auto p-4 lg:p-6 scroll-smooth bg-[var(--color-surface)]">
-            {isInitializing ? (
-              <div className="flex flex-col items-center justify-center h-full text-[var(--color-muted-foreground)]">
-                <div className="h-4 w-4 rounded-full bg-[var(--color-primary)] animate-ping mb-4" />
-                <p className="text-sm font-medium animate-pulse">Connecting to INTERVU engine...</p>
-              </div>
-            ) : error ? (
-              <div className="flex flex-col items-center justify-center h-full text-red-500">
-                <AlertCircle className="w-8 h-8 mb-2" />
-                <p className="text-sm font-medium">{error}</p>
-                <Button variant="outline" size="sm" className="mt-4" onClick={() => window.location.reload()}>Retry</Button>
-              </div>
-            ) : (
-              <>
-                {chat.map((msg, idx) => (
-                  msg.role === "interviewer" ? (
-                    <QuestionBubble key={idx} text={msg.text} />
-                  ) : (
-                    <AnswerBubble key={idx} text={msg.text} />
-                  )
-                ))}
-                {isProcessing && <TypingIndicator text="Evaluating reasoning..." />}
-                <div ref={bottomRef} />
-              </>
-            )}
-          </div>
-
-          <div className="p-3 lg:p-4 bg-[var(--color-background)] lg:border-t border-[var(--color-border)] shadow-[0_-4px_16px_rgba(0,0,0,0.05)] lg:shadow-none">
-            <div className="relative rounded-[16px] overflow-hidden border border-[var(--color-border)] bg-[var(--color-surface)] focus-within:ring-2 focus-within:ring-[var(--color-primary)] transition-shadow">
-              <textarea
-                className="w-full min-h-[120px] lg:min-h-[100px] resize-none p-4 pr-24 bg-transparent outline-none text-sm text-[var(--color-foreground)] placeholder:text-[var(--color-muted-foreground)]"
-                placeholder="Type your response..."
-                value={answerInput}
-                onChange={e => setAnswerInput(e.target.value)}
-                disabled={isInitializing || !!error}
-                onKeyDown={e => {
-                  if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-                    handleSubmit();
-                  }
-                }}
-              />
-              <div className="absolute bottom-3 right-3 flex gap-2 items-center">
-                <Button size="sm" onClick={handleSubmit} disabled={isProcessing || !answerInput.trim() || isInitializing || !!error}>
-                  Submit
-                </Button>
-              </div>
+          {/* Assessment Context Header */}
+          {!isInitializing && !error && currentTurn && (
+            <div className="flex flex-col items-center justify-center my-6 space-y-2 opacity-80 fade-in">
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--color-muted-foreground)]">Assessment Area</span>
+              <span className="text-sm font-medium text-[var(--color-foreground)] px-4 py-1.5 bg-[var(--color-muted)] rounded-full border border-[var(--color-border)]">
+                {currentTurn.topic === "Introduction" ? "Technical Screening" : "Adaptive Follow-up"}
+              </span>
             </div>
-            <p className="hidden lg:block text-[11px] text-center text-[var(--color-muted-foreground)] mt-3">Press <kbd className="font-mono bg-[#E5E5DF] text-[#1A1C1B] px-1.5 py-0.5 rounded shadow-sm">Cmd + Enter</kbd> to submit</p>
-          </div>
-        </section>
+          )}
 
-        {/* Right Column: Intelligence */}
-        <aside className={`${activeTab === "eval" ? "flex" : "hidden"} lg:flex lg:col-span-3 flex-col gap-6 overflow-y-auto p-4 lg:p-0`}>
-          {evalPanelContent}
-        </aside>
+          {isInitializing ? (
+            <div className="flex flex-col items-center justify-center h-full text-[var(--color-muted-foreground)] fade-in">
+              <div className="h-4 w-4 rounded-full border-2 border-[var(--color-primary)] border-t-transparent animate-spin mb-4" />
+              <p className="text-sm font-medium">Connecting to INTERVU engine...</p>
+            </div>
+          ) : error ? (
+            <div className="flex flex-col items-center justify-center h-full text-red-500 fade-in">
+              <AlertCircle className="w-10 h-10 mb-4 opacity-80" />
+              <p className="text-sm font-medium mb-1">Connection Lost</p>
+              <p className="text-xs opacity-80 max-w-xs text-center">{error}</p>
+              <Button variant="outline" size="sm" className="mt-6" onClick={() => window.location.reload()}>Retry Connection</Button>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-6">
+              {chat.map((msg, idx) => (
+                <div key={idx} className={`flex flex-col ${msg.role === 'interviewer' ? 'items-start' : 'items-end'} fade-in-up`}>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--color-muted-foreground)] mb-2 px-1">
+                    {msg.role === 'interviewer' ? 'INTERVU' : 'Candidate'}
+                  </span>
+                  {msg.role === 'interviewer' ? (
+                    <div className="bg-white dark:bg-[#1E1E1E] border border-[var(--color-border)] rounded-2xl rounded-tl-sm px-5 py-4 shadow-sm max-w-[90%] text-[15px] leading-relaxed text-[var(--color-foreground)]">
+                      {msg.text}
+                    </div>
+                  ) : (
+                    <div className="bg-[var(--color-primary)] text-white rounded-2xl rounded-tr-sm px-5 py-4 shadow-sm max-w-[90%] text-[15px] leading-relaxed">
+                      {msg.text}
+                    </div>
+                  )}
+                </div>
+              ))}
+              
+              {isProcessing && (
+                <div className="flex flex-col items-start fade-in-up">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--color-muted-foreground)] mb-2 px-1">
+                    INTERVU
+                  </span>
+                  <div className="bg-white dark:bg-[#1E1E1E] border border-[var(--color-border)] rounded-2xl rounded-tl-sm px-5 py-4 shadow-sm flex items-center gap-3">
+                    <div className="flex gap-1.5">
+                      <div className="w-1.5 h-1.5 bg-[var(--color-primary)] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <div className="w-1.5 h-1.5 bg-[var(--color-primary)] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <div className="w-1.5 h-1.5 bg-[var(--color-primary)] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                    </div>
+                    <span className="text-xs font-medium text-[var(--color-muted-foreground)] ml-2">Evaluating response...</span>
+                  </div>
+                </div>
+              )}
+              <div ref={bottomRef} className="h-4" />
+            </div>
+          )}
+        </div>
+
+        {/* Sticky Input Footer */}
+        <div className="p-4 lg:p-6 bg-[var(--color-surface)] border-t border-[var(--color-border)] z-20">
+          <div className="relative rounded-2xl overflow-hidden border border-[var(--color-border)] bg-white dark:bg-[#1A1C1B] focus-within:ring-2 focus-within:ring-[var(--color-primary)] focus-within:border-transparent transition-all shadow-sm">
+            <textarea
+              className="w-full min-h-[100px] max-h-[250px] resize-y p-5 pr-24 bg-transparent outline-none text-[15px] text-[var(--color-foreground)] placeholder:text-[var(--color-muted-foreground)]"
+              placeholder={isInitializing ? "Initializing assessment..." : "Type your technical response..."}
+              value={answerInput}
+              onChange={e => setAnswerInput(e.target.value)}
+              disabled={isInitializing || !!error || isProcessing}
+              onKeyDown={e => {
+                if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                  handleSubmit();
+                }
+              }}
+            />
+            <div className="absolute bottom-4 right-4 flex items-center">
+              <Button 
+                onClick={handleSubmit} 
+                disabled={isProcessing || !answerInput.trim() || isInitializing || !!error}
+                className="rounded-xl px-6 h-10 shadow-sm"
+              >
+                Send <span className="ml-2">↑</span>
+              </Button>
+            </div>
+          </div>
+          <div className="flex justify-between items-center mt-3 px-1">
+             <p className="text-[11px] text-[var(--color-muted-foreground)]">Your answers are evaluated based on technical depth and clarity.</p>
+             <p className="hidden sm:block text-[11px] text-[var(--color-muted-foreground)]">Press <kbd className="font-mono bg-[var(--color-muted)] border border-[var(--color-border)] px-1.5 py-0.5 rounded ml-1">Cmd + Enter</kbd></p>
+          </div>
+        </div>
 
       </main>
     </div>
