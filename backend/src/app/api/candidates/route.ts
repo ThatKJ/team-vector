@@ -1,39 +1,36 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
-import crypto from 'crypto';
-import { supabase } from '@/lib/supabase';
-
-function generateUUID(str: string) {
-  const hash = crypto.createHash('md5').update(str).digest('hex');
-  return `${hash.substring(0,8)}-${hash.substring(8,12)}-4${hash.substring(13,16)}-8${hash.substring(17,20)}-${hash.substring(20,32)}`;
-}
+import { getCandidates, getCandidateProgress } from '@/lib/db';
 
 export async function GET() {
   try {
-    const filePath = path.join(process.cwd(), 'src/lib/data/candidates.json');
-    const fileContents = fs.readFileSync(filePath, 'utf8');
-    const rawCandidates = JSON.parse(fileContents);
-    
-    // Seed Supabase with valid UUIDs
-    for (const c of rawCandidates) {
-      const uuid = generateUUID(c.id);
-      await supabase.from('candidates').upsert({
-        id: uuid,
-        name: c.name,
-        email: `${c.id.toLowerCase()}@example.com`
-      }, { onConflict: 'id' });
-    }
+    const rawCandidates = await getCandidates();
 
-    return NextResponse.json(rawCandidates.map((c: any) => ({
-      id: generateUUID(c.id),
-      name: c.name,
-      role: c.role,
-      experience: c.experienceLevel,
-      status: 'pending'
-    })));
+    const formatted = await Promise.all(rawCandidates.map(async (c: any) => {
+      // Fetch progress dynamically to attach to candidate for the engine
+      const progress = await getCandidateProgress(c.id);
+      
+      const missions = progress.map((p: any) => ({
+        id: p.topic_id, 
+        name: p.curriculum_topics?.topic_name || 'Mission',
+        status: p.status.toLowerCase(), // frontend expects lowercase 'passed' etc
+        attempts: p.attempts
+      }));
+
+      return {
+        id: c.id,
+        name: c.name,
+        role: c.job_role,
+        experienceLevel: c.years_experience >= 5 ? 'Senior' : c.years_experience >= 3 ? 'Mid-Level' : 'Junior',
+        education: c.education,
+        status: c.status,
+        missions,
+        signals: c.metadata?.signals
+      };
+    }));
+
+    return NextResponse.json(formatted);
   } catch (error) {
-    console.error(error);
+    console.error("Failed to fetch candidates:", error);
     return NextResponse.json({ error: 'Failed to fetch candidates' }, { status: 500 });
   }
 }
