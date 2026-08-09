@@ -2,19 +2,19 @@
 
 @theme {
   /* Colors */
-  --color-background: #FAFAFA;
-  --color-foreground: #171717;
+  --color-background: #FDFBF7;
+  --color-foreground: #2D2A26;
   
-  --color-primary: #10B981;
+  --color-primary: #171717;
   --color-primary-foreground: #FFFFFF;
   
   --color-surface: #FFFFFF;
-  --color-surface-foreground: #171717;
+  --color-surface-foreground: #2D2A26;
   
-  --color-border: #E5E7EB;
+  --color-border: #E6E2D6;
   
-  --color-muted: #F3F4F6;
-  --color-muted-foreground: #6B7280;
+  --color-muted: #F5F2EB;
+  --color-muted-foreground: #737067;
 
   /* Typography */
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;

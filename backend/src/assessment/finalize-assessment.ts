@@ -1,7 +1,7 @@
 import { getSession, getInterviewHistory } from '../db/sessions';
 import { supabase } from '../db/client';
 import { CandidateKnowledgeState } from '../core/types';
-import { groqProvider } from '../llm/groq';
+import { geminiProvider } from '../llm/gemini';
 
 const reportJsonSchema = {
   type: "object",
@@ -165,7 +165,7 @@ Produce a structured JSON report. Ensure the overall score is EXACTLY ${calculat
 `;
 
   // 4. Generate report with a single LLM call
-  const generatedReport = await groqProvider.generateStructuredContent(systemPrompt, userPrompt, reportJsonSchema);
+  const generatedReport = await geminiProvider.generateStructuredContent(systemPrompt, userPrompt, reportJsonSchema);
 
   // 5. Merge trajectory and raw competencies
   const finalReportJson = {

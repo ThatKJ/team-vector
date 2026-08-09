@@ -1,4 +1,4 @@
-import { groqProvider } from '../groq';
+import { geminiProvider } from '../gemini';
 import { EvaluatorOutput } from '../../core/types';
 
 const evaluatorJsonSchema = {
@@ -75,5 +75,5 @@ Remember: Do not invent weaknesses. Only list missing concepts if they were stri
 Output MUST strictly conform to the required JSON schema.
 `;
 
-  return groqProvider.generateStructuredContent<EvaluatorOutput>(systemPrompt, userPrompt, evaluatorJsonSchema);
+  return geminiProvider.generateStructuredContent<EvaluatorOutput>(systemPrompt, userPrompt, evaluatorJsonSchema);
 }

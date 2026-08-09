@@ -127,7 +127,7 @@ export class InterviewOrchestrator {
     
     let plannerOutput: PlannerOutput | null = null;
     let attempts = 0;
-    const maxAttempts = 3;
+    const maxAttempts = 2;
     let rejectionReason = "";
     
     while (attempts < maxAttempts) {
@@ -223,7 +223,14 @@ export class InterviewOrchestrator {
 
     if (!plannerOutput || attempts >= maxAttempts) {
       if (!plannerOutput) throw new Error('LLM_INVALID_RESPONSE');
-      console.warn("[NOVELTY GUARD] Max attempts reached, proceeding with last generated question despite warnings.");
+      console.warn("[NOVELTY GUARD] Max attempts reached, forcing fallback cross-check question.");
+      plannerOutput = {
+        ...plannerOutput,
+        strategy: 'CROSS_CHECK',
+        targetConcept: 'integration',
+        question: `Let's switch gears a bit. How would you approach integrating the concepts we've discussed so far into a larger, distributed system? What specific challenges would you anticipate?`,
+        rationale: 'Forced fallback due to novelty guard max attempts reached.',
+      }
     }
 
     const nextTurn = await addInterviewTurn(sessionId, currentTurnNumber, 'interviewer', plannerOutput.question, {
@@ -289,6 +296,14 @@ export class InterviewOrchestrator {
     const weakCount = tested.filter(c => c.confidence > 0.8 && c.conceptualUnderstanding < 0.3).length;
     if (weakCount >= 2) {
       return true;
+    }
+
+    // Stop if user is not able to answer anything after the 4th question
+    if (turnNumber >= 4) {
+      const unableToAnswerCount = tested.filter(c => c.conceptualUnderstanding < 0.3).length;
+      if (unableToAnswerCount >= 2 || (tested.length > 0 && tested.every(c => c.conceptualUnderstanding < 0.4))) {
+        return true;
+      }
     }
 
     // Stop if average uncertainty is very low and we've done at least 5 turns

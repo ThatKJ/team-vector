@@ -1,4 +1,4 @@
-import { groqProvider } from '../groq';
+import { geminiProvider } from '../gemini';
 import { PlannerOutput, CandidateKnowledgeState, EvaluatorOutput } from '../../core/types';
 
 const plannerJsonSchema = {
@@ -67,6 +67,7 @@ CRITICAL RULES FOR ADAPTATION:
 7. Do NOT use the same strategy more than twice in a row. You MUST transition to a different strategy (e.g., PROBE_DEPTH -> PROBE_APPLICATION).
 8. SATURATED CONCEPTS: You MUST NOT ask about the following saturated concepts: ${saturatedConcepts.length ? saturatedConcepts.join(', ') : 'None'}.
 9. The semantic fingerprint MUST accurately classify the question to prevent repetition.
+10. DO NOT add conversational filler to your question like "No worries at all", "That's okay", "I understand", "Let's move on". Just ask the next question directly and professionally.
 
 You MUST return ONLY valid JSON matching this exact schema:
 ${JSON.stringify(plannerJsonSchema, null, 2)}
@@ -102,5 +103,5 @@ Generate the actual question text and the semantic fingerprint.
 Provide the reasoning and purpose for this selection.
 `;
 
-  return groqProvider.generateStructuredContent<PlannerOutput>(systemPrompt, userPrompt, plannerJsonSchema);
+  return geminiProvider.generateStructuredContent<PlannerOutput>(systemPrompt, userPrompt, plannerJsonSchema);
 }

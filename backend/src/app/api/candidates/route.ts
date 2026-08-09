@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { supabase } from '@/db/client';
 
 export async function GET() {
   try {
@@ -8,14 +9,30 @@ export async function GET() {
     const fileContents = fs.readFileSync(dataPath, 'utf8');
     const candidates = JSON.parse(fileContents);
 
-    // Ensure they have the status 'pending' unless they have completed a session (which we could compute, but let's just return the static data first)
-    // The frontend maps missions, so we can just return candidates.
-    // If the frontend needs experience instead of experienceLevel, map it:
-    const formatted = candidates.map((c: any) => ({
-      ...c,
-      experience: c.experienceLevel, // map for frontend
-      status: 'pending' // base status
-    }));
+    const { data: sessions } = await supabase
+      .from('interview_sessions')
+      .select('id, candidate_id, status');
+
+    const sessionMap = new Map();
+    if (sessions) {
+      for (const session of sessions) {
+        // Keep the latest or completed session
+        const existing = sessionMap.get(session.candidate_id);
+        if (!existing || session.status === 'COMPLETED') {
+          sessionMap.set(session.candidate_id, session);
+        }
+      }
+    }
+
+    const formatted = candidates.map((c: any) => {
+      const session = sessionMap.get(c.id);
+      return {
+        ...c,
+        experience: c.experienceLevel,
+        status: session?.status === 'COMPLETED' ? 'completed' : (session ? 'in_progress' : 'pending'),
+        sessionId: session?.id || null
+      };
+    });
 
     return NextResponse.json(formatted);
   } catch (error) {

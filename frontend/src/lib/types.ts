@@ -5,6 +5,7 @@ export interface Candidate {
   experience: string;
   status: "pending" | "completed" | "in_progress";
   avatarUrl?: string;
+  sessionId?: string;
 }
 
 export interface InterviewSession {

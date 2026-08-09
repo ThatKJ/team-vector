@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import { motion } from "framer-motion";
 import { apiClient } from "@/lib/api-client";
 
 export default function ReportPage() {
@@ -15,8 +16,8 @@ export default function ReportPage() {
 
   if (!report) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-[#FAFAFA]">
-        <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-400 animate-pulse">
+      <div className="flex h-screen w-full items-center justify-center bg-[var(--color-background)]">
+        <div className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--color-muted-foreground)] animate-pulse">
           Generating intelligence dossier...
         </div>
       </div>
@@ -43,19 +44,24 @@ export default function ReportPage() {
   const competencies = report.rawCompetencies ? Object.entries(report.rawCompetencies) : [];
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] text-neutral-900 font-sans selection:bg-neutral-200 py-16 px-8">
-      <div className="max-w-4xl mx-auto bg-white border border-neutral-200 p-12 md:p-20 shadow-sm">
+    <div className="min-h-screen bg-[var(--color-background)] text-[var(--color-foreground)] font-sans selection:bg-[var(--color-muted)] py-16 px-6">
+      <div className="max-w-4xl mx-auto bg-white/60 backdrop-blur-3xl border border-[var(--color-border)] p-10 md:p-20 shadow-2xl shadow-black/5 rounded-3xl">
         
         {/* Dossier Header */}
-        <header className="mb-16">
+        <motion.header 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="mb-16"
+        >
           <div className="text-[10px] font-bold tracking-[0.2em] uppercase text-emerald-600 mb-2">
             INTERVU
           </div>
-          <h1 className="text-3xl md:text-4xl font-medium tracking-tight text-neutral-900 mb-12">
+          <h1 className="text-3xl md:text-5xl font-heading font-black tracking-tight text-[var(--color-foreground)] mb-12">
             TECHNICAL ASSESSMENT DOSSIER
           </h1>
 
-          <div className="flex flex-col md:flex-row justify-between items-start border-t border-b border-neutral-200 py-6">
+          <div className="flex flex-col md:flex-row justify-between items-start border-t border-b border-[var(--color-border)] py-6">
             <div className="flex flex-col gap-4">
               <div>
                 <div className="text-[10px] font-bold tracking-[0.2em] uppercase text-neutral-400 mb-1">
@@ -94,10 +100,15 @@ export default function ReportPage() {
               </div>
             </div>
           </div>
-        </header>
+        </motion.header>
 
         {/* Hero Verdict */}
-        <div className="mb-20 text-center">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="mb-20 text-center"
+        >
           <div className="text-[10px] font-bold tracking-[0.2em] uppercase text-neutral-400 mb-6">
             OVERALL ASSESSMENT
           </div>
@@ -110,41 +121,46 @@ export default function ReportPage() {
           <div className="text-xl text-neutral-700 italic max-w-2xl mx-auto">
             "{summary}"
           </div>
-        </div>
+        </motion.div>
 
         {/* Competency Map */}
         {competencies.length > 0 && (
-          <div className="mb-20">
-            <div className="text-[11px] font-bold tracking-[0.2em] uppercase text-neutral-900 mb-4">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="mb-20"
+          >
+            <div className="text-[11px] font-bold tracking-[0.2em] uppercase text-[var(--color-foreground)] mb-4">
               COMPETENCY MAP
             </div>
-            <hr className="border-neutral-200 mb-8" />
+            <hr className="border-[var(--color-border)] mb-8" />
             <div className="space-y-6 font-mono text-sm">
               {competencies.map(([name, data]: [string, any], idx) => (
-                <div key={idx} className="flex justify-between items-center border-b border-neutral-100 pb-4">
-                  <div className="w-1/3 text-neutral-900 font-bold">{name}</div>
-                  <div className="w-2/3 flex justify-end gap-6 text-xs text-neutral-500">
-                    <div className="flex flex-col items-end">
-                      <span className="uppercase text-[9px] tracking-widest mb-1">Correctness</span>
-                      <span className="text-neutral-900">{(data.conceptualUnderstanding * 100).toFixed(0)}</span>
+                <div key={idx} className="flex flex-col md:flex-row md:justify-between md:items-center border-b border-[var(--color-border)] pb-4 hover:bg-[var(--color-muted)]/50 transition-colors rounded-xl p-4">
+                  <div className="w-full md:w-1/3 text-[var(--color-foreground)] font-bold mb-4 md:mb-0">{name}</div>
+                  <div className="w-full md:w-2/3 flex justify-between md:justify-end gap-2 md:gap-8 text-xs text-[var(--color-muted-foreground)]">
+                    <div className="flex flex-col items-center md:items-end">
+                      <span className="uppercase text-[9px] font-bold tracking-widest mb-1">Correctness</span>
+                      <span className="text-[var(--color-foreground)] font-black text-base">{(data.conceptualUnderstanding * 100).toFixed(0)}</span>
                     </div>
-                    <div className="flex flex-col items-end">
-                      <span className="uppercase text-[9px] tracking-widest mb-1">Depth</span>
-                      <span className="text-neutral-900">{(data.reasoningAbility * 100).toFixed(0)}</span>
+                    <div className="flex flex-col items-center md:items-end">
+                      <span className="uppercase text-[9px] font-bold tracking-widest mb-1">Depth</span>
+                      <span className="text-[var(--color-foreground)] font-black text-base">{(data.reasoningAbility * 100).toFixed(0)}</span>
                     </div>
-                    <div className="flex flex-col items-end">
-                      <span className="uppercase text-[9px] tracking-widest mb-1">Application</span>
-                      <span className="text-neutral-900">{(data.applicationAbility * 100).toFixed(0)}</span>
+                    <div className="flex flex-col items-center md:items-end">
+                      <span className="uppercase text-[9px] font-bold tracking-widest mb-1">Application</span>
+                      <span className="text-[var(--color-foreground)] font-black text-base">{(data.applicationAbility * 100).toFixed(0)}</span>
                     </div>
-                    <div className="flex flex-col items-end">
-                      <span className="uppercase text-[9px] tracking-widest mb-1">Uncertainty</span>
-                      <span className="text-neutral-900">{(data.uncertainty * 100).toFixed(0)}</span>
+                    <div className="flex flex-col items-center md:items-end">
+                      <span className="uppercase text-[9px] font-bold tracking-widest mb-1">Uncertainty</span>
+                      <span className="text-[var(--color-foreground)] font-black text-base">{(data.uncertainty * 100).toFixed(0)}</span>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
-          </div>
+          </motion.div>
         )}
 
         {/* Strengths & Gaps */}
@@ -211,7 +227,12 @@ export default function ReportPage() {
         </div>
 
         {/* Adaptation Timeline */}
-        <div className="mb-20">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.5 }}
+          className="mb-20"
+        >
           <div className="text-[11px] font-bold tracking-[0.2em] uppercase text-neutral-900 mb-4">
             ADAPTATION TIMELINE
           </div>
@@ -219,8 +240,15 @@ export default function ReportPage() {
           
           <div className="flex flex-col items-center font-mono text-[11px] space-y-4">
             {report.trajectory?.map((t: any, idx: number) => (
-              <div key={idx} className="flex flex-col items-center w-full max-w-sm">
-                <div className="bg-neutral-50 p-4 border border-neutral-200 w-full text-center">
+              <motion.div 
+                key={idx} 
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: idx * 0.1 }}
+                className="flex flex-col items-center w-full max-w-sm"
+              >
+                <div className="bg-neutral-50 p-4 border border-neutral-200 w-full text-center hover:bg-neutral-100 transition-colors">
                   <div className="text-[9px] uppercase tracking-widest text-neutral-500 mb-1">
                     TURN {idx + 1} {t.fingerprint?.competency ? `• ${t.fingerprint.competency}` : ''}
                   </div>
@@ -234,16 +262,21 @@ export default function ReportPage() {
                 {idx < report.trajectory!.length - 1 && (
                   <div className="text-neutral-300 my-2">↓</div>
                 )}
-              </div>
+              </motion.div>
             ))}
-            <div className="flex flex-col items-center w-full max-w-sm">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              className="flex flex-col items-center w-full max-w-sm"
+            >
               <div className="text-neutral-300 my-2">↓</div>
               <div className="bg-neutral-900 text-white px-4 py-3 border border-neutral-900 font-bold w-full text-center">
                 CONCLUDE
               </div>
-            </div>
+            </motion.div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Evidence Log */}
         <div className="mb-20">
