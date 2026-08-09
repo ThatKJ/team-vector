@@ -34,7 +34,13 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
     if (err.message === 'CONCURRENCY_CONFLICT' || err.code === '23505') {
        return NextResponse.json({ error: 'Simultaneous requests detected.', code: 'CONCURRENCY_CONFLICT' }, { status: 409 });
     }
-    
-    return NextResponse.json({ error: 'Failed to finalize assessment', details: err.message }, { status: 500 });
+
+    const code = err?.code || err?.message || 'INTERNAL_ERROR';
+    return NextResponse.json({
+      error: 'Failed to finalize assessment',
+      code,
+      stage: 'FINALIZE',
+      details: err.message
+    }, { status: 500 });
   }
 }

@@ -1,7 +1,9 @@
 CREATE TABLE IF NOT EXISTS assessment_reports (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  session_id UUID NOT NULL UNIQUE REFERENCES interview_sessions(id) ON DELETE CASCADE,
-  candidate_id UUID NOT NULL,
+  session_id VARCHAR(255) NOT NULL UNIQUE REFERENCES interview_sessions(id) ON DELETE CASCADE,
+  -- TEXT, not UUID: candidate ids are dossier ids like "CAND-001" (see
+  -- candidates.json / interview_sessions.candidate_id VARCHAR(255)).
+  candidate_id VARCHAR(255) NOT NULL,
   overall_score INTEGER NOT NULL,
   verdict TEXT NOT NULL,
   report JSONB NOT NULL,
