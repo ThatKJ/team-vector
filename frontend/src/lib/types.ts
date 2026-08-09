@@ -6,6 +6,7 @@ export interface Candidate {
   status: "pending" | "completed" | "in_progress";
   avatarUrl?: string;
   sessionId?: string;
+  missions?: { id: string; name: string; status: string; attempts: number }[];
 }
 
 export interface InterviewSession {
@@ -48,6 +49,7 @@ export interface InterviewTurn {
 export interface StartInterviewResponse {
   interview_id: string;
   status: string;
+  started_at?: string | null;
   first_turn: InterviewTurn;
 }
 
@@ -85,10 +87,31 @@ export interface ReportEvidence {
   gaps: StructuredEvidence[];
 }
 
+export interface RawCompetency {
+  conceptualUnderstanding: number;
+  reasoningAbility: number;
+  applicationAbility: number;
+  uncertainty: number;
+}
+
 export interface InterviewReport {
   score: number;
   categories: ReportCategoryScores;
   evidence: ReportEvidence;
   next_steps: string[];
-  trajectory?: { strategy: string; rationale: string }[];
+  trajectory?: {
+    strategy: string;
+    rationale?: string;
+    decision?: string;
+    fingerprint?: { competency?: string };
+  }[];
+  verdict?: string;
+  summary?: string;
+  rawCompetencies?: Record<string, RawCompetency>;
+  final_recommendation?: {
+    strongest_signal: string;
+    biggest_risk: string;
+    recommended_next_step: string;
+  };
+  _meta?: { generatedAt?: string; version?: number };
 }

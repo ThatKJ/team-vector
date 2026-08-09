@@ -61,8 +61,15 @@ describe('INTERVU Adaptation Harness', () => {
         return {
           targetCompetency: 'Test Competency', targetConcept: 'Test Concept', targetDimension: 'concept',
           strategy: 'BASELINE', questionType: 'conceptual', difficulty: 3, rationale: 'test',
-          expectedEvidence: [], uncertaintyBeingReduced: 'test', whyNow: 'test', question: `Test Question ${plannerCount} ${Math.random()}`,
+          purpose: 'test', expectedEvidence: [], uncertaintyBeingReduced: 'test',
+          uncertaintyBefore: 0.8, uncertaintyAfter: 0.4, informationGain: 0.4, whyNow: 'test',
+          question: `Test Question ${plannerCount} ${Math.random()}`,
           stopCondition: 'test',
+          fingerprint: {
+            competency: 'Test Competency', concept: `Test Concept ${plannerCount}`, targetDimension: 'concept',
+            taskType: 'conceptual', cognitiveOperation: 'recall', scenario: 'test',
+            expectedEvidence: [], difficulty: 3, adaptationStrategy: 'BASELINE'
+          },
           ...res
         };
       }

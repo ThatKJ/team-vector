@@ -17,6 +17,9 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
     });
   } catch (err: any) {
     console.error(err);
+    if (err?.code === 'AI_UNAVAILABLE' || err?.name === 'AIUnavailableError') {
+      return NextResponse.json({ error: err.message || 'The AI interviewer is temporarily busy. Your progress has been saved. You can resume shortly.', code: 'AI_UNAVAILABLE', retryable: true }, { status: 503 });
+    }
     if (err.name === 'LLMError') {
       const isRateLimit = err.code === 'LLM_RATE_LIMITED';
       if (isRateLimit) return NextResponse.json({ error: 'The assessment engine is temporarily rate limited.', code: 'LLM_RATE_LIMITED', retryable: true }, { status: 429 });

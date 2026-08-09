@@ -25,6 +25,39 @@
   --radius-sm: 2px;
   --radius-lg: 4px;
   --radius-xl: 8px;
+
+  /* Landing palette — Intervu design system (assets/design/intervu/DESIGN.md) */
+  --color-carbon: #f9f9f6;
+  --color-carbon-raise: #eeeeeb;
+  --color-carbon-card: #ffffff;
+  --color-carbon-line: rgb(189 202 188 / 0.45);
+  --color-pearl: #1a1c1b;
+  --color-mist: #3e4a3f;
+  --color-fog: #6e7a6e;
+  --color-neon: #006d35;
+  --color-neon-soft: #005226;
+  --color-mint: #006d35;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-carbon);
+}
+
+::selection {
+  background: rgb(0 109 53 / 0.2);
+  color: var(--color-pearl);
+}
+
+/* Faint technical grid for hero / final CTA backgrounds */
+.landing-grid {
+  background-image:
+    linear-gradient(to right, rgb(26 28 27 / 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(26 28 27 / 0.04) 1px, transparent 1px);
+  background-size: 56px 56px;
 }
 
 @layer base {
@@ -43,4 +76,17 @@
 
 .animate-flash-overlay {
   animation: flash-overlay 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

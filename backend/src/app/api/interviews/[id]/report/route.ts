@@ -24,9 +24,6 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
       }, { status: 409 });
     }
 
-    console.log(`[REPORT FETCH] Report retrieved from database for session: ${id}`);
-    
-    // Add version and generatedAt to the response payload wrapper
     return NextResponse.json({
       ...existingReport.report,
       _meta: {

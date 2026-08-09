@@ -2,80 +2,114 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Button } from "./Button";
-import { Menu, X } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { ArrowRight, Menu, User, X } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const pathname = usePathname();
+
+  const links = [
+    { href: "/candidates", label: "Candidates" },
+    { href: "/history", label: "History" },
+  ];
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-[var(--color-border)] bg-[var(--color-surface)]/80 backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-2">
-          <Link href="/" className="flex items-center gap-2 group outline-none focus-visible:ring-2 focus-visible:ring-black rounded-md p-1 -ml-1">
-            <div className="h-8 w-8 rounded-md bg-[var(--color-foreground)] flex items-center justify-center transition-transform duration-200 group-hover:scale-105 shadow-md">
-              <span className="text-[var(--color-background)] font-heading font-black text-lg">I</span>
-            </div>
-            <span className="font-heading text-xl font-black tracking-widest uppercase">Intervu</span>
-          </Link>
-        </div>
-        
-        {/* Desktop Nav */}
-        <div className="hidden md:flex items-center gap-8">
-          <Link href="/candidates" className="text-xs font-bold uppercase tracking-[0.15em] text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] transition-colors">
-            Candidates
-          </Link>
-          <Link href="/history" className="text-xs font-bold uppercase tracking-[0.15em] text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] transition-colors">
-            History
-          </Link>
-          <Link href="/candidates" tabIndex={-1}>
-            <button className="px-5 py-2.5 bg-[var(--color-foreground)] text-[var(--color-background)] rounded-xl text-xs font-bold tracking-[0.1em] uppercase transition-all shadow-xl shadow-black/5 hover:opacity-90 active:scale-[0.98]">
-              Start Assessment
-            </button>
-          </Link>
+    <header className="sticky top-0 z-50 border-b border-carbon-line bg-carbon/90 backdrop-blur-xl">
+      <nav className="mx-auto flex h-[72px] max-w-[1280px] items-center justify-between px-4 sm:px-6 lg:px-10">
+        <Link
+          href="/"
+          aria-label="Intervu home"
+          className="group -ml-1 flex items-center gap-3 rounded-md p-1 outline-none focus-visible:ring-2 focus-visible:ring-neon"
+        >
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-neon font-heading text-base font-bold text-white transition-transform duration-200 group-hover:scale-105">
+            I
+          </span>
+          <span className="font-heading text-[22px] font-semibold tracking-tight text-pearl">
+            Intervu
+          </span>
+        </Link>
+
+        <div className="hidden items-center gap-8 md:flex">
+          {links.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={cn(
+                "text-sm font-semibold tracking-[0.05em] transition-colors rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-neon",
+                pathname?.startsWith(link.href)
+                  ? "text-neon"
+                  : "text-mist hover:text-pearl"
+              )}
+            >
+              {link.label}
+            </Link>
+          ))}
         </div>
 
-        {/* Mobile Nav Toggle */}
-        <div className="md:hidden flex items-center">
-          <button 
-            type="button" 
-            className="p-2 -mr-2 text-[var(--color-foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-md"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label="Toggle menu"
+        <div className="hidden items-center gap-6 md:flex">
+          <span className="flex items-center gap-2 text-sm font-semibold tracking-[0.05em] text-mist">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-neon opacity-60" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-neon" />
+            </span>
+            Online
+          </span>
+          <Link
+            href="/candidates"
+            className="inline-flex h-11 items-center gap-2 rounded-full bg-neon px-6 text-sm font-semibold text-white transition-all duration-200 hover:scale-[1.02] hover:bg-neon/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neon"
           >
-            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
+            Start assessment
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-neon">
+            <User className="h-[18px] w-[18px] text-white" />
+          </span>
         </div>
-      </div>
 
-      {/* Mobile Nav Menu */}
+        <button
+          type="button"
+          onClick={() => setMobileMenuOpen((v) => !v)}
+          aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+          aria-expanded={mobileMenuOpen}
+          className="rounded-full p-2 text-pearl outline-none focus-visible:ring-2 focus-visible:ring-neon md:hidden"
+        >
+          {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        </button>
+      </nav>
+
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-[var(--color-border)] bg-[var(--color-surface)] absolute w-full shadow-2xl">
-          <div className="space-y-1 px-6 pb-6 pt-4">
-            <Link 
-              href="/candidates" 
-              className="block px-3 py-3 text-xs font-bold uppercase tracking-widest text-[var(--color-foreground)] hover:bg-[var(--color-muted)] rounded-xl"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Candidates
-            </Link>
-            <Link 
-              href="/history" 
-              className="block px-3 py-3 text-xs font-bold uppercase tracking-widest text-[var(--color-foreground)] hover:bg-[var(--color-muted)] rounded-xl"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              History
-            </Link>
-            <div className="pt-4">
-              <Link href="/candidates" onClick={() => setMobileMenuOpen(false)}>
-                <button className="w-full px-5 py-3 bg-[var(--color-foreground)] text-[var(--color-background)] rounded-xl text-xs font-bold tracking-[0.1em] uppercase transition-all shadow-xl shadow-black/5 hover:opacity-90">
-                  Start Assessment
-                </button>
+        <div className="border-b border-carbon-line bg-carbon/95 backdrop-blur-xl md:hidden">
+          <div className="space-y-1 px-6 py-4">
+            {links.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className={cn(
+                  "block rounded-full px-4 py-3 text-sm font-semibold",
+                  pathname?.startsWith(link.href)
+                    ? "text-neon"
+                    : "text-mist hover:bg-carbon-raise hover:text-pearl"
+                )}
+              >
+                {link.label}
+              </Link>
+            ))}
+            <div className="pt-3">
+              <Link
+                href="/candidates"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-neon text-sm font-semibold text-white"
+              >
+                Start assessment
+                <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
           </div>
         </div>
       )}
-    </nav>
+    </header>
   );
 }

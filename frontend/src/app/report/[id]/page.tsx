@@ -9,12 +9,24 @@ export default function ReportPage() {
   const params = useParams();
   const id = params.id as string;
   const [report, setReport] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const load = () => {
+    setLoading(true);
+    setError(null);
+    apiClient
+      .getReport(id)
+      .then(setReport)
+      .catch((err: Error) => setError(err.message || "Failed to load report"))
+      .finally(() => setLoading(false));
+  };
 
   useEffect(() => {
-    apiClient.getReport(id).then(setReport).catch(console.error);
+    load();
   }, [id]);
 
-  if (!report) {
+  if (loading && !report) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-[var(--color-background)]">
         <div className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--color-muted-foreground)] animate-pulse">
@@ -23,6 +35,30 @@ export default function ReportPage() {
       </div>
     );
   }
+
+  if (error) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-[var(--color-background)]">
+        <div className="flex max-w-md flex-col items-center gap-4 text-center">
+          <div className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--color-muted-foreground)]">
+            Report unavailable
+          </div>
+          <p className="text-sm text-[var(--color-muted-foreground)]">
+            {error}
+          </p>
+          <button
+            type="button"
+            onClick={load}
+            className="rounded-full bg-emerald-600 px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!report) return null;
 
   const score = report.score ?? 0;
   const verdict = report.verdict || "PENDING";

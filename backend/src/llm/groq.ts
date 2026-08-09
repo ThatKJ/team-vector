@@ -13,11 +13,37 @@ function getGroqClient() {
   return client;
 }
 
-function getGroqModel() {
-  return process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
+function getGroqModel(model?: string) {
+  return model || process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
+}
+
+function pickQuotaHeaders(headers: any): Record<string, string> | null {
+  if (!headers) return null;
+  const keys = [
+    'x-ratelimit-remaining-requests',
+    'x-ratelimit-remaining-tokens',
+    'x-ratelimit-reset-requests',
+    'x-ratelimit-reset-tokens',
+    'retry-after',
+  ];
+  const out: Record<string, string> = {};
+  let found = false;
+  for (const key of keys) {
+    const value =
+      typeof headers.get === 'function'
+        ? headers.get(key)
+        : headers[key] ?? headers[key.toLowerCase()];
+    if (value !== undefined && value !== null) {
+      out[key] = String(value);
+      found = true;
+    }
+  }
+  return found ? out : null;
 }
 
 export class GroqProvider implements LLMProvider {
+  /** Exposed for the AI gateway's quota manager (consumed and cleared after each call). */
+  public lastQuotaHeaders: Record<string, string> | null = null;
   /**
    * Safe JSON extraction from LLM response
    */
@@ -44,10 +70,11 @@ export class GroqProvider implements LLMProvider {
     systemPrompt: string,
     userPrompt: string,
     purpose: string,
-    attempt: number
+    attempt: number,
+    model?: string
   ): Promise<string> {
     const groqClient = getGroqClient();
-    const currentModel = getGroqModel();
+    const currentModel = getGroqModel(model);
     if (!groqClient) {
       throw new LLMError('Groq API key is missing.', LLM_ERROR_CODES.LLM_AUTH_ERROR);
     }
@@ -65,8 +92,8 @@ export class GroqProvider implements LLMProvider {
         max_tokens: 2048,
       });
 
-      const latency = Date.now() - startTime;
-      console.log(`[LLM OBSERVABILITY] Provider: Groq, Model: ${currentModel}, Purpose: ${purpose}, Attempt: ${attempt}, Latency: ${latency}ms, Status: SUCCESS`);
+      const quotaHeaders = pickQuotaHeaders((response as any).headers);
+      if (quotaHeaders) this.lastQuotaHeaders = quotaHeaders;
 
       const content = response.choices[0]?.message?.content;
       if (!content) {
@@ -109,7 +136,8 @@ export class GroqProvider implements LLMProvider {
   public async generateStructuredContent<T>(
     systemPrompt: string,
     userPrompt: string,
-    schemaDescription: any
+    schemaDescription: any,
+    model?: string
   ): Promise<T> {
     const purpose = systemPrompt.substring(0, 50).replace(/\n/g, ' ') + '...';
     let lastError: any = null;
@@ -120,7 +148,7 @@ export class GroqProvider implements LLMProvider {
 
     for (let attempt = 1; attempt <= 3; attempt++) {
       try {
-        const rawContent = await this.executeGroqCall(systemPrompt, userPrompt, purpose, attempt);
+        const rawContent = await this.executeGroqCall(systemPrompt, userPrompt, purpose, attempt, model);
         const jsonStr = this.extractJSON(rawContent);
         
         try {
@@ -129,7 +157,7 @@ export class GroqProvider implements LLMProvider {
           console.warn(`[JSON PARSE ERROR] Attempt ${attempt} failed to parse JSON. Attempting repair...`);
           const repairPrompt = `${userPrompt}\n\nWARNING: Your previous response was invalid JSON. It failed with error: ${parseError.message}. You MUST return strictly valid JSON matching the exact schema requested. Do not include markdown blocks or any conversational text.`;
           
-          const repairedContent = await this.executeGroqCall(systemPrompt, repairPrompt, `${purpose} (Repair)`, attempt);
+          const repairedContent = await this.executeGroqCall(systemPrompt, repairPrompt, `${purpose} (Repair)`, attempt, model);
           const repairedJsonStr = this.extractJSON(repairedContent);
           
           try {

@@ -1,4 +1,4 @@
-import { geminiProvider } from '../gemini';
+import { aiGenerateStructuredContent } from '../../ai/gateway';
 import { PlannerOutput, CandidateKnowledgeState, EvaluatorOutput } from '../../core/types';
 
 const plannerJsonSchema = {
@@ -48,7 +48,8 @@ export async function generateNextQuestion(
   history: { role: string, content: string }[],
   curriculumTopics: string[],
   currentTurnNumber: number,
-  rejectionReason: string = ""
+  rejectionReason: string = "",
+  contextId?: string
 ): Promise<PlannerOutput> {
   const saturatedConcepts = Object.values(state.competencies).flatMap(c => c.saturatedConcepts || []);
 
@@ -103,5 +104,11 @@ Generate the actual question text and the semantic fingerprint.
 Provide the reasoning and purpose for this selection.
 `;
 
-  return geminiProvider.generateStructuredContent<PlannerOutput>(systemPrompt, userPrompt, plannerJsonSchema);
+  return aiGenerateStructuredContent<PlannerOutput>({
+    task: 'questionGeneration',
+    systemPrompt,
+    userPrompt,
+    schemaDescription: plannerJsonSchema,
+    contextId,
+  });
 }

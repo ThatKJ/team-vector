@@ -28,7 +28,7 @@ export async function GET() {
       const session = sessionMap.get(c.id);
       return {
         ...c,
-        experience: c.experienceLevel,
+        experience: c.experience ?? c.experienceLevel,
         status: session?.status === 'COMPLETED' ? 'completed' : (session ? 'in_progress' : 'pending'),
         sessionId: session?.id || null
       };

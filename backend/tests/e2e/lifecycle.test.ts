@@ -167,12 +167,12 @@ describe('Candidate & Session Lifecycle', () => {
     expect(result.isNew).toBe(true);
   });
 
-  it('propagates LLM errors properly and does not swallow them', async () => {
+  it('surfaces graceful degraded mode when every free provider is exhausted', async () => {
     const sessionId = crypto.randomUUID();
     
     await InterviewOrchestrator.initializeSession(candidateId, sessionId);
     
-    // Force the LLM to throw an LLMError
+    // Force the LLM to throw an LLMError (e.g. every free provider rate limited)
     const llmError = new Error('Rate limit exceeded');
     llmError.name = 'LLMError';
     (llmError as any).code = 'LLM_RATE_LIMITED';
@@ -182,8 +182,9 @@ describe('Candidate & Session Lifecycle', () => {
       await InterviewOrchestrator.processTurn(sessionId, "answer");
       expect.fail("Should have thrown");
     } catch (err: any) {
-      expect(err.name).toBe('LLMError');
-      expect(err.code).toBe('LLM_RATE_LIMITED');
+      // All free providers failed → graceful AI unavailable (never a paid model)
+      expect(err.code).toBe('AI_UNAVAILABLE');
+      expect(err.retryable).toBe(true);
     }
   });
 });

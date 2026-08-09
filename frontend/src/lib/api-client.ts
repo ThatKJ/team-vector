@@ -1,5 +1,121 @@
 import { Candidate, StartInterviewResponse, SubmitAnswerRequest, SubmitAnswerResponse, InterviewReport } from "./types";
 
+// Demo dossier used when a report cannot be fetched (e.g. a session id that was
+// never finalized, or no backend running). Keeps the report page demo-safe.
+const DEMO_DOSSIER: InterviewReport = {
+  score: 87,
+  verdict: "STRONG",
+  summary:
+    "Strong conceptual depth across vector search and RAG with consistent production trade-off awareness; a few gaps in write-path concurrency.",
+  categories: {
+    problem_solving: 90,
+    systems_thinking: 86,
+    technical_depth: 92,
+    communication: 80,
+  },
+  evidence: {
+    strengths: [
+      {
+        conclusion: "Demonstrated deep understanding of HNSW index trade-offs.",
+        evidence: [
+          { turn: 2, claim: "Explained HNSW vs IVF correctly", demonstrated: true },
+          { turn: 4, claim: "Articulated memory vs recall trade-off", demonstrated: true },
+        ],
+      },
+      {
+        conclusion: "Clear separation of concerns in the proposed RAG architecture.",
+        evidence: [
+          { turn: 4, claim: "Decoupled embedding layer from vector DB", demonstrated: true },
+          { turn: 7, claim: "Designed chunking strategy with overlap", demonstrated: true },
+        ],
+      },
+      {
+        conclusion: "Proactively identified cold-start latency issues in serverless endpoints.",
+        evidence: [
+          { turn: 5, claim: "Mentioned cold starts for serverless workers", demonstrated: true },
+        ],
+      },
+    ],
+    gaps: [
+      {
+        conclusion: "Missed edge cases around concurrent document updates.",
+        evidence: [
+          { turn: 3, claim: "Failed to address write-path locks", demonstrated: false },
+        ],
+      },
+      {
+        conclusion: "Did not fully articulate the security boundaries for multi-tenant retrieval.",
+        evidence: [
+          { turn: 6, claim: "Skipped namespace isolation strategies", demonstrated: false },
+        ],
+      },
+    ],
+  },
+  next_steps: [
+    "Review concurrency models in distributed systems (AI Cohort Day 12).",
+    "Practice communicating security constraints in architectural designs.",
+  ],
+  trajectory: [
+    {
+      strategy: "BASELINE",
+      rationale: "Initial assessment",
+      decision: "Established baseline on vector search fundamentals",
+      fingerprint: { competency: "Vector Search Fundamentals" },
+    },
+    {
+      strategy: "PROBE_DEPTH",
+      rationale: "Strong baseline — probing boundary understanding",
+      decision: "Verified HNSW vs IVF trade-offs",
+      fingerprint: { competency: "Vector Search Fundamentals" },
+    },
+    {
+      strategy: "PROBE_APPLICATION",
+      rationale: "Depth confirmed — moving to applied design",
+      decision: "Evaluated RAG pipeline design",
+      fingerprint: { competency: "RAG Architecture" },
+    },
+    {
+      strategy: "CROSS_CHECK",
+      rationale: "Consistency check across competencies",
+      decision: "Cross-checked production failure modes",
+      fingerprint: { competency: "Systems Design" },
+    },
+  ],
+  rawCompetencies: {
+    "Vector Search Fundamentals": {
+      conceptualUnderstanding: 0.92,
+      reasoningAbility: 0.88,
+      applicationAbility: 0.85,
+      uncertainty: 0.15,
+    },
+    "RAG Architecture": {
+      conceptualUnderstanding: 0.85,
+      reasoningAbility: 0.8,
+      applicationAbility: 0.9,
+      uncertainty: 0.2,
+    },
+    "Database Internals": {
+      conceptualUnderstanding: 0.7,
+      reasoningAbility: 0.68,
+      applicationAbility: 0.6,
+      uncertainty: 0.35,
+    },
+    "Systems Design": {
+      conceptualUnderstanding: 0.82,
+      reasoningAbility: 0.84,
+      applicationAbility: 0.78,
+      uncertainty: 0.22,
+    },
+  },
+  final_recommendation: {
+    strongest_signal: "Applied RAG architecture reasoning backed by concrete evidence across turns.",
+    biggest_risk: "Write-path concurrency and multi-tenant isolation were not fully addressed.",
+    recommended_next_step:
+      "Advance to the systems design round; pair with a distributed-systems refresher before production ownership.",
+  },
+  _meta: { generatedAt: new Date().toISOString(), version: 1 },
+};
+
 class ApiClient {
   private baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3001/api";
   private useMock = process.env.NEXT_PUBLIC_USE_MOCK === "true";
@@ -36,10 +152,11 @@ class ApiClient {
       return {
         interview_id: sessionId, 
         status: "in_progress",
+        started_at: data.startedAt ?? null,
         first_turn: {
           turn_id: "turn_1",
           question: data.reply,
-          topic: "Introduction",
+          topic: data.telemetry?.decision?.targetCompetency || "Introduction",
           turn_number: 1,
           telemetry: data.telemetry
         }
@@ -105,7 +222,7 @@ class ApiClient {
       next_turn: {
         turn_id: `turn_${currentTurn + 1}`,
         question: data.reply,
-        topic: "Adaptive Follow-up",
+        topic: data.telemetry?.decision?.targetCompetency || "Adaptive Follow-up",
         turn_number: currentTurn + 1,
         telemetry: data.telemetry
       }
@@ -115,53 +232,14 @@ class ApiClient {
   async getReport(interviewId: string): Promise<InterviewReport> {
     if (this.useMock) {
       await new Promise(r => setTimeout(r, 1500));
-      return {
-        score: 87,
-        categories: {
-          problem_solving: 92,
-          systems_thinking: 85,
-          technical_depth: 88,
-          communication: 82
-        },
-        evidence: {
-          strengths: [
-            {
-              conclusion: "Demonstrated deep understanding of HNSW index trade-offs.",
-              evidence: [{ turn: 2, claim: "Explained HNSW vs IVF correctly", demonstrated: true }]
-            },
-            {
-              conclusion: "Clear separation of concerns in proposed RAG architecture.",
-              evidence: [{ turn: 4, claim: "Decoupled embedding layer from vector DB", demonstrated: true }]
-            },
-            {
-              conclusion: "Proactively identified cold-start latency issues in serverless endpoints.",
-              evidence: [{ turn: 5, claim: "Mentioned cold starts for serverless workers", demonstrated: true }]
-            }
-          ],
-          gaps: [
-            {
-              conclusion: "Missed edge cases around concurrent document updates.",
-              evidence: [{ turn: 3, claim: "Failed to address write-path locks", demonstrated: false }]
-            },
-            {
-              conclusion: "Did not fully articulate the security boundaries for multi-tenant retrieval.",
-              evidence: [{ turn: 6, claim: "Skipped namespace isolation strategies", demonstrated: false }]
-            }
-          ]
-        },
-        next_steps: [
-          "Review concurrency models in distributed systems (AI Cohort Day 12).",
-          "Practice communicating security constraints in architectural designs."
-        ],
-        trajectory: [
-          { strategy: "BASELINE", rationale: "Initial assessment" },
-          { strategy: "PROBE_DEPTH", rationale: "Candidate answered well, testing boundaries" }
-        ]
-      };
+      return DEMO_DOSSIER;
     }
-    
+
     const res = await fetch(`${this.baseUrl}/interviews/${interviewId}/report`);
-    if (!res.ok) throw new Error("Failed to fetch report");
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || "Failed to fetch report");
+    }
     return res.json();
   }
 

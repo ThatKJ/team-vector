@@ -1,7 +1,7 @@
 import { getSession, getInterviewHistory } from '../db/sessions';
 import { supabase } from '../db/client';
 import { CandidateKnowledgeState } from '../core/types';
-import { geminiProvider } from '../llm/gemini';
+import { aiGenerateStructuredContent } from '../ai/gateway';
 
 const reportJsonSchema = {
   type: "object",
@@ -164,8 +164,14 @@ ${history.map((h: any) => `Turn ${h.turn_number} (${h.role}): ${h.content}`).joi
 Produce a structured JSON report. Ensure the overall score is EXACTLY ${calculatedScore}. Every strength/gap MUST cite the exact turn and claim.
 `;
 
-  // 4. Generate report with a single LLM call
-  const generatedReport = await geminiProvider.generateStructuredContent(systemPrompt, userPrompt, reportJsonSchema);
+  // 4. Generate report with a single LLM call (best available FREE model via gateway)
+  const generatedReport = await aiGenerateStructuredContent<any>({
+    task: 'report',
+    systemPrompt,
+    userPrompt,
+    schemaDescription: reportJsonSchema,
+    contextId: sessionId,
+  });
 
   // 5. Merge trajectory and raw competencies
   const finalReportJson = {

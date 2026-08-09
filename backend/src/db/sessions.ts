@@ -2,7 +2,6 @@ import { supabase } from './client';
 import { CandidateKnowledgeState } from '../core/types';
 
 export async function getSession(sessionId: string) {
-  console.log(`[DB] Looking up session: ${sessionId}`);
   const { data, error } = await supabase
     .from('interview_sessions')
     .select('*')
@@ -87,7 +86,6 @@ export async function addInterviewTurn(
 }
 
 export async function getCandidate(candidateId: string) {
-  console.log(`[DB] Looking up candidate: ${candidateId}`);
   const { data, error } = await supabase
     .from('candidates')
     .select('*')

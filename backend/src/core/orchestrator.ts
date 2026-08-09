@@ -18,6 +18,7 @@ export class InterviewOrchestrator {
       return { 
         sessionId: session.id,
         isNew: false,
+        startedAt: session.started_at,
         state: session.assessment_state as CandidateKnowledgeState
       };
     }
@@ -47,6 +48,7 @@ export class InterviewOrchestrator {
     return {
       sessionId: newSession.id,
       isNew: true,
+      startedAt: newSession.started_at,
       state: initialState
     };
   }
@@ -78,7 +80,8 @@ export class InterviewOrchestrator {
       targetConcept, 
       lastQuestionTurn?.content || '', 
       candidateMessage, 
-      history.map((h: any) => ({ role: h.role === 'interviewer' ? 'assistant' : 'user', content: h.content }))
+      history.map((h: any) => ({ role: h.role === 'interviewer' ? 'assistant' : 'user', content: h.content })),
+      sessionId
     );
 
     await addTurnEvaluation(turn.id, evaluation);
@@ -127,7 +130,7 @@ export class InterviewOrchestrator {
     
     let plannerOutput: PlannerOutput | null = null;
     let attempts = 0;
-    const maxAttempts = 2;
+    const maxAttempts = 3;
     let rejectionReason = "";
     
     while (attempts < maxAttempts) {
@@ -150,18 +153,10 @@ export class InterviewOrchestrator {
         history.map((h: any) => ({ role: h.role === 'interviewer' ? 'assistant' : 'user', content: h.content })), 
         topics,
         currentTurnNumber,
-        rejectionReason // Pass rejection to prompt
+        rejectionReason, // Pass rejection to prompt
+        sessionId
       );
       
-      // DIAGNOSTIC TRACE
-      console.log(`\n================ TURN ${currentTurnNumber} DIAGNOSTIC ================`);
-      console.log(`Question: ${plannerOutput.question.substring(0, 50)}...`);
-      console.log(`Strategy: ${plannerOutput.strategy}`);
-      console.log(`Target:   ${plannerOutput.targetCompetency}`);
-      console.log(`Dim:      ${plannerOutput.targetDimension}`);
-      console.log(`Uncertainty Before: ${plannerOutput.uncertaintyBefore}, After: ${plannerOutput.uncertaintyAfter}, Gain: ${plannerOutput.informationGain}`);
-      console.log(`====================================================\n`);
-
       rejectionReason = ""; // reset
       let isAccepted = true;
 
@@ -219,6 +214,7 @@ export class InterviewOrchestrator {
       if (isAccepted) break;
       console.warn(`[NOVELTY GUARD] Rejecting question: ${rejectionReason}`);
       attempts++;
+      rejectionReason = `${rejectionReason} (attempt ${attempts} of ${maxAttempts})`;
     }
 
     if (!plannerOutput || attempts >= maxAttempts) {

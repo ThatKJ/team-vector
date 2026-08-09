@@ -1,4 +1,4 @@
-import { geminiProvider } from '../gemini';
+import { aiGenerateStructuredContent } from '../../ai/gateway';
 import { EvaluatorOutput } from '../../core/types';
 
 const evaluatorJsonSchema = {
@@ -40,7 +40,8 @@ export async function evaluateAnswer(
   targetConcept: string,
   question: string,
   answer: string,
-  history: { role: string, content: string }[]
+  history: { role: string, content: string }[],
+  contextId?: string
 ): Promise<EvaluatorOutput> {
   const systemPrompt = `
 You are an expert technical interviewer evaluating a candidate's answer.
@@ -75,5 +76,11 @@ Remember: Do not invent weaknesses. Only list missing concepts if they were stri
 Output MUST strictly conform to the required JSON schema.
 `;
 
-  return geminiProvider.generateStructuredContent<EvaluatorOutput>(systemPrompt, userPrompt, evaluatorJsonSchema);
+  return aiGenerateStructuredContent<EvaluatorOutput>({
+    task: 'evaluation',
+    systemPrompt,
+    userPrompt,
+    schemaDescription: evaluatorJsonSchema,
+    contextId,
+  });
 }

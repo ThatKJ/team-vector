@@ -14,10 +14,9 @@ export async function POST(request: Request) {
 
     // INITIALIZATION
     if (candidate && !message) {
-      console.log(`[INTERVIEW] Init request for candidate: ${candidate.id}`);
       try {
         const result = await requestDeduper.dedupe(`init:${sessionId}`, async () => {
-          const { isNew, state } = await InterviewOrchestrator.initializeSession(candidate.id, sessionId);
+          const { isNew, state, startedAt } = await InterviewOrchestrator.initializeSession(candidate.id, sessionId);
           
           if (!isNew) {
             // Idempotent: return the last generated question
@@ -28,6 +27,7 @@ export async function POST(request: Request) {
             
             return {
               sessionId,
+              startedAt: startedAt ?? null,
               reply: lastInterviewerTurn?.content || '',
               done: false,
               assessmentSignal: lastTrajectory.decision || '',
@@ -46,6 +46,7 @@ export async function POST(request: Request) {
           
           return {
             sessionId,
+            startedAt: startedAt ?? null,
             reply: (processResult as any).reply,
             done: false,
             assessmentSignal: (processResult as any).assessmentSignal,
@@ -89,6 +90,9 @@ export async function POST(request: Request) {
 }
 
 function handleApiError(err: any) {
+  if (err?.code === 'AI_UNAVAILABLE' || err?.name === 'AIUnavailableError') {
+    return NextResponse.json({ error: err.message || 'The AI interviewer is temporarily busy. Your progress has been saved. You can resume shortly.', code: 'AI_UNAVAILABLE', retryable: true }, { status: 503 });
+  }
   if (err.name === 'LLMError') {
      const isRateLimit = err.code === 'LLM_RATE_LIMITED';
      const isAuth = err.code === 'LLM_AUTH_ERROR';

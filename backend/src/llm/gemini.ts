@@ -62,8 +62,6 @@ export class GeminiProvider implements LLMProvider {
       }
 
       const data = await response.json();
-      const latency = Date.now() - startTime;
-      console.log(`[LLM OBSERVABILITY] Provider: Gemini, Model: ${currentModel}, Purpose: ${purpose}, Attempt: ${attempt}, Latency: ${latency}ms, Status: SUCCESS`);
 
       const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
       if (!content) {
@@ -84,7 +82,8 @@ export class GeminiProvider implements LLMProvider {
   public async generateStructuredContent<T>(
     systemPrompt: string,
     userPrompt: string,
-    schemaDescription: any
+    schemaDescription: any,
+    _model?: string
   ): Promise<T> {
     const purpose = systemPrompt.substring(0, 50).replace(/\n/g, ' ') + '...';
     let lastError: any = null;

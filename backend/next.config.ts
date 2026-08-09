@@ -1,5 +1,10 @@
 import type { NextConfig } from "next";
 
+// Browser origin allowed to call this API. Set ALLOWED_ORIGIN on Vercel to the
+// frontend's production URL (e.g. https://intervu.vercel.app); defaults to the
+// local frontend dev server.
+const allowedOrigin = process.env.ALLOWED_ORIGIN || "http://localhost:3000";
+
 const nextConfig: NextConfig = {
   async headers() {
     return [
@@ -7,7 +12,7 @@ const nextConfig: NextConfig = {
         source: "/api/:path*",
         headers: [
           { key: "Access-Control-Allow-Credentials", value: "true" },
-          { key: "Access-Control-Allow-Origin", value: "http://localhost:3000" },
+          { key: "Access-Control-Allow-Origin", value: allowedOrigin },
           { key: "Access-Control-Allow-Methods", value: "GET,OPTIONS,PATCH,DELETE,POST,PUT" },
           { key: "Access-Control-Allow-Headers", value: "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version" },
         ]

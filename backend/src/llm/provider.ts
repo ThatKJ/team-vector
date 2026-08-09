@@ -5,7 +5,8 @@ export interface LLMProvider {
   generateStructuredContent<T>(
     systemPrompt: string,
     userPrompt: string,
-    schemaDescription: any // e.g. a JSON Schema object, or simply the stringified representation of the required TypeScript interface.
+    schemaDescription: any, // e.g. a JSON Schema object, or simply the stringified representation of the required TypeScript interface.
+    model?: string // optional model override selected by the AI gateway (FREE_ONLY pool)
   ): Promise<T>;
 }
 

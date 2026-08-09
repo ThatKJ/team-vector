@@ -8,7 +8,8 @@
     "start": "PORT=3001 next start",
     "lint": "eslint",
     "db:reset-dev": "npx tsx scripts/reset-dev.ts",
-    "test": "vitest run"
+    "test": "vitest run",
+    "db:seed": "npx tsx scripts/seed.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.2",
