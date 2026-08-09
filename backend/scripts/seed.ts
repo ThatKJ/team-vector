@@ -102,14 +102,14 @@ async function seed() {
 
   console.log("Seeding candidates and progress...");
   for (const c of candidates) {
-    const candidateId = generateUUID(c.id);
+    const candidateId = c.id;
     
     // Signals
     const metadata = {
       signals: c.signals || {
-        commitDays: c.commitDays,
-        missionsCompleted: c.missionsCompleted,
-        missionsFirstTry: c.missionsFirstTry
+        commitDays: c.commitDays || 0,
+        missionsCompleted: c.missionsCompleted || 0,
+        missionsFirstTry: c.missionsFirstTry || 0
       }
     };
 

@@ -1,201 +1,116 @@
 import { NextResponse } from 'next/server';
-import { getSession, createSession, updateSession, finishSession } from '@/lib/sessionManager';
-import { determineNextStrategy, planNextQuestion, determineRoundAndCompletion } from '@/lib/strategyEngine';
-import { generateQuestion, evaluateAnswer, generateFeedback } from '@/lib/gemini';
-import { updateTheory, adjustDifficulty } from '@/lib/theoryEngine';
-import { supabase } from '@/lib/supabase';
-import { getCandidate, getCandidateProgress } from '@/lib/db';
+import { InterviewOrchestrator } from '@/core/orchestrator';
+import { requestDeduper } from '@/utils/request-deduper';
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     
     if (!body.sessionId) {
-      return NextResponse.json({ error: 'Missing sessionId' }, { status: 400 });
+      return NextResponse.json({ error: 'Missing sessionId', code: 'INVALID_REQUEST' }, { status: 400 });
     }
     
     const { sessionId, candidate, message } = body;
-    let session = getSession(sessionId);
 
-    // START INTERVIEW
-    if (candidate) {
-      if (session) {
-        return NextResponse.json({ error: 'Session already started' }, { status: 400 });
-      }
-
-      // Reconstruct full candidate from DB
-      const dbCandidate = await getCandidate(candidate.id);
-      const progress = await getCandidateProgress(candidate.id);
-      
-      const fullCandidate = {
-        ...dbCandidate,
-        missions: progress.map((p: any) => ({
-          id: p.topic_id,
-          name: p.curriculum_topics?.topic_name || 'Mission',
-          status: p.status.toLowerCase(),
-          attempts: p.attempts
-        }))
-      };
-
-      session = createSession(sessionId, fullCandidate);
-      
-      const { targetModule, targetDay, questionType } = planNextQuestion(session.theory, session.currentStrategy);
-      const generated = await generateQuestion(
-        session.theory, 
-        session.currentStrategy, 
-        targetModule, 
-        targetDay, 
-        session.currentDifficulty, 
-        questionType
-      );
-      
-      session = updateSession(sessionId, {
-        conversationHistory: [{ role: 'assistant', content: generated.question }]
-      });
-
-      // Persist to Supabase
-      await supabase.from('interviews')
-        .upsert({ id: sessionId, candidate_id: candidate.id, status: 'in_progress', started_at: new Date().toISOString() }, { onConflict: 'id' });
-
-      await supabase.from('interview_turns')
-        .insert({
-          interview_id: sessionId,
-          turn_number: 1,
-          question_text: generated.question
-        });
-
-      return NextResponse.json({
-        reply: generated.question,
-        done: false,
-      });
-    }
-
-    // CONTINUE INTERVIEW
-    if (message) {
-      if (!session) {
-        return NextResponse.json({ error: 'Unknown sessionId' }, { status: 404 });
-      }
-      
-      if (session.isComplete) {
-        return NextResponse.json({ error: 'Session already completed' }, { status: 400 });
-      }
-
-      const lastQuestion = session.conversationHistory[session.conversationHistory.length - 1].content;
-      const currentPlan = planNextQuestion(session.theory, session.currentStrategy);
-      const targetModuleId = currentPlan.targetModule;
-
-      const evaluation = await evaluateAnswer(lastQuestion, message, targetModuleId);
-      
-      const newTheory = updateTheory(
-        session.theory,
-        evaluation.signal,
-        evaluation.reasoning,
-        evaluation.answerSummary,
-        lastQuestion,
-        targetModuleId,
-        evaluation.affectedDimensions,
-        (evaluation.claims || []) as any
-      );
-
-      const { newRound, isComplete } = determineRoundAndCompletion(newTheory);
-      newTheory.currentRound = newRound;
-
-      session = updateSession(sessionId, { 
-        theory: newTheory,
-        currentDifficulty: adjustDifficulty(session.currentDifficulty, evaluation.signal),
-        conversationHistory: [
-          ...session.conversationHistory, 
-          { role: 'user', content: message }
-        ]
-      });
-
-      // Determine current turn number for Supabase
-      const { data: turns } = await supabase.from('interview_turns')
-        .select('id, turn_number')
-        .eq('interview_id', sessionId)
-        .order('turn_number', { ascending: false })
-        .limit(1);
-      
-      const currentTurn = turns?.[0];
-      if (currentTurn) {
-        await supabase.from('interview_turns')
-          .update({ candidate_answer: message, evaluation_notes: evaluation.reasoning })
-          .eq('id', currentTurn.id);
-      }
-
-      // Check Completion
-      if (isComplete) {
-        const feedback = await generateFeedback(session.theory);
-        
-        const avgScore = Object.values(session.theory.modules).reduce((sum, mod) => sum + mod.score, 0) / 8;
-        const verdict = avgScore > 80 ? 'Strong Hire' : avgScore > 65 ? 'Hire' : avgScore > 50 ? 'Borderline' : 'Needs Development';
-        const assessmentConfidence = Object.values(session.theory.modules).reduce((sum, mod) => sum + mod.confidence, 0) / 8;
-
-        const finalSession = finishSession(sessionId, feedback);
-        
-        // Persist completion
-        await supabase.from('interviews')
-          .update({ status: 'completed', completed_at: new Date().toISOString(), score: Math.round(avgScore) })
-          .eq('id', sessionId);
-
-        await supabase.from('reports')
-          .insert({
-            interview_id: sessionId,
-            overall_score: Math.round(avgScore),
-            summary: feedback || "Completed interview.",
-            decision_trace: { verdict, confidence: assessmentConfidence }
-          });
-
-        return NextResponse.json({
-          reply: "Thank you for completing the interview. Your feedback is ready.",
-          done: true,
-          feedback: {
-            summary: feedback,
-            strengths: ["Persisted in DB"],
-            gaps: ["Persisted in DB"],
-            next: ["Persisted in DB"]
+    // INITIALIZATION
+    if (candidate && !message) {
+      console.log(`[INTERVIEW] Init request for candidate: ${candidate.id}`);
+      try {
+        const result = await requestDeduper.dedupe(`init:${sessionId}`, async () => {
+          const { isNew, state } = await InterviewOrchestrator.initializeSession(candidate.id, sessionId);
+          
+          if (!isNew) {
+            // Idempotent: return the last generated question
+            const { getInterviewHistory } = await import('@/db/sessions');
+            const history = await getInterviewHistory(sessionId);
+            const lastInterviewerTurn = history.reverse().find((h: any) => h.role === 'interviewer');
+            const lastTrajectory = state.trajectory[state.trajectory.length - 1] || {};
+            
+            return {
+              sessionId,
+              reply: lastInterviewerTurn?.content || '',
+              done: false,
+              assessmentSignal: lastTrajectory.decision || '',
+              nextAction: lastTrajectory.strategy || 'BASELINE',
+              telemetry: {
+                knowledgeState: {
+                  competencies: state.competencies,
+                  trajectory: state.trajectory
+                }
+              }
+            };
           }
+          
+          // Generate the first question for a new session
+          const processResult = await InterviewOrchestrator.processTurn(sessionId, '');
+          
+          return {
+            sessionId,
+            reply: (processResult as any).reply,
+            done: false,
+            assessmentSignal: (processResult as any).assessmentSignal,
+            nextAction: (processResult as any).nextAction,
+            telemetry: (processResult as any).telemetry
+          };
         });
+        
+        return NextResponse.json(result);
+      } catch (err: any) {
+        console.error(err);
+        return handleApiError(err);
       }
-
-      // Generate next question
-      const nextStrategy = determineNextStrategy(session.theory);
-      session = updateSession(sessionId, { currentStrategy: nextStrategy });
-
-      const nextPlan = planNextQuestion(session.theory, session.currentStrategy);
-      const nextGenerated = await generateQuestion(
-        session.theory, 
-        session.currentStrategy, 
-        nextPlan.targetModule, 
-        nextPlan.targetDay, 
-        session.currentDifficulty, 
-        nextPlan.questionType
-      );
-
-      session = updateSession(sessionId, {
-        conversationHistory: [
-          ...session.conversationHistory,
-          { role: 'assistant', content: nextGenerated.question }
-        ]
-      });
-
-      await supabase.from('interview_turns')
-        .insert({
-          interview_id: sessionId,
-          turn_number: (currentTurn?.turn_number || 1) + 1,
-          question_text: nextGenerated.question
-        });
-
-      return NextResponse.json({
-        reply: nextGenerated.question,
-        done: false
-      });
     }
 
-    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
+    // CONTINUE
+    if (message !== undefined) {
+      try {
+        // Find current turn for deduping
+        const { getSession } = await import('@/db/sessions');
+        const session = await getSession(sessionId);
+        const currentTurn = session ? session.current_turn : 0;
+        
+        const result = await requestDeduper.dedupe(`turn:${sessionId}:${currentTurn}`, async () => {
+          return await InterviewOrchestrator.processTurn(sessionId, message);
+        });
+        
+        return NextResponse.json(result);
+      } catch (err: any) {
+        console.error(err);
+        return handleApiError(err);
+      }
+    }
+
+    return NextResponse.json({ error: 'Invalid request', code: 'INVALID_REQUEST' }, { status: 400 });
 
   } catch (err: any) {
     console.error(err);
     return NextResponse.json({ error: err.message || 'Internal Server Error' }, { status: 500 });
   }
+}
+
+function handleApiError(err: any) {
+  if (err.name === 'LLMError') {
+     const isRateLimit = err.code === 'LLM_RATE_LIMITED';
+     const isAuth = err.code === 'LLM_AUTH_ERROR';
+     const isModel = err.code === 'LLM_MODEL_UNAVAILABLE';
+     
+     if (isRateLimit) return NextResponse.json({ error: 'The assessment engine is temporarily rate limited.', code: 'LLM_RATE_LIMITED', retryable: true }, { status: 429 });
+     if (isAuth) return NextResponse.json({ error: 'Assessment engine authentication failed.', code: 'LLM_AUTH_ERROR', retryable: false }, { status: 500 });
+     if (isModel) return NextResponse.json({ error: 'Assessment engine model unavailable.', code: 'LLM_MODEL_UNAVAILABLE', retryable: false }, { status: 500 });
+     
+     return NextResponse.json({ error: 'Assessment engine temporarily unavailable.', code: 'LLM_UNAVAILABLE', retryable: true }, { status: 500 });
+  }
+  if (err.message === 'SESSION_ALREADY_COMPLETED') {
+     return NextResponse.json({ error: 'Interview is already completed.', code: 'SESSION_ALREADY_COMPLETED' }, { status: 400 });
+  }
+  if (err.message === 'SESSION_NOT_FOUND') {
+     return NextResponse.json({ error: 'Session not found.', code: 'SESSION_NOT_FOUND' }, { status: 404 });
+  }
+  if (err.message === 'CANDIDATE_NOT_FOUND') {
+     return NextResponse.json({ error: 'Candidate not found.', code: 'CANDIDATE_NOT_FOUND' }, { status: 404 });
+  }
+  if (err.message === 'CONCURRENCY_CONFLICT' || err.code === '23505') {
+     return NextResponse.json({ error: 'Simultaneous requests detected.', code: 'CONCURRENCY_CONFLICT' }, { status: 409 });
+  }
+  return NextResponse.json({ error: 'Internal Server Error', code: 'INTERNAL_ERROR' }, { status: 500 });
 }

@@ -30,7 +30,8 @@ function SetupContent() {
   const handleStart = () => {
     if (!candidateId) return;
     setStarting(true);
-    router.push(`/interview/${candidateId}`);
+    const sessionId = crypto.randomUUID();
+    router.push(`/interview/${sessionId}?candidateId=${candidateId}`);
   };
 
   if (!candidate) {

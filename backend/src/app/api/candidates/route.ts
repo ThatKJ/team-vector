@@ -1,31 +1,20 @@
 import { NextResponse } from 'next/server';
-import { getCandidates, getCandidateProgress } from '@/lib/db';
+import fs from 'fs';
+import path from 'path';
 
 export async function GET() {
   try {
-    const rawCandidates = await getCandidates();
+    const dataPath = path.join(process.cwd(), 'src', 'lib', 'data', 'candidates.json');
+    const fileContents = fs.readFileSync(dataPath, 'utf8');
+    const candidates = JSON.parse(fileContents);
 
-    const formatted = await Promise.all(rawCandidates.map(async (c: any) => {
-      // Fetch progress dynamically to attach to candidate for the engine
-      const progress = await getCandidateProgress(c.id);
-      
-      const missions = progress.map((p: any) => ({
-        id: p.topic_id, 
-        name: p.curriculum_topics?.topic_name || 'Mission',
-        status: p.status.toLowerCase(), // frontend expects lowercase 'passed' etc
-        attempts: p.attempts
-      }));
-
-      return {
-        id: c.id,
-        name: c.name,
-        role: c.job_role,
-        experienceLevel: c.years_experience >= 5 ? 'Senior' : c.years_experience >= 3 ? 'Mid-Level' : 'Junior',
-        education: c.education,
-        status: c.status,
-        missions,
-        signals: c.metadata?.signals
-      };
+    // Ensure they have the status 'pending' unless they have completed a session (which we could compute, but let's just return the static data first)
+    // The frontend maps missions, so we can just return candidates.
+    // If the frontend needs experience instead of experienceLevel, map it:
+    const formatted = candidates.map((c: any) => ({
+      ...c,
+      experience: c.experienceLevel, // map for frontend
+      status: 'pending' // base status
     }));
 
     return NextResponse.json(formatted);

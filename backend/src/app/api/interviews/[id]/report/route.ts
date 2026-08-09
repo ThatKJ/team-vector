@@ -1,47 +1,42 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/db/client';
 
-export async function GET(request: Request, context: any) {
-  const params = await context.params;
-  const interviewId = params.id;
-  
+export async function GET(request: Request, props: { params: Promise<{ id: string }> }) {
   try {
-    const { data: report, error } = await supabase.from('reports')
-      .select('*')
-      .eq('interview_id', interviewId)
-      .single();
+    const params = await props.params;
+    const { id } = params;
 
-    if (error || !report) {
-      return NextResponse.json({ error: 'Report not found' }, { status: 404 });
+    const { data: existingReport, error } = await supabase
+      .from('assessment_reports')
+      .select('*')
+      .eq('session_id', id)
+      .maybeSingle();
+
+    if (error) {
+      console.error('Database error fetching report:', error);
+      return NextResponse.json({ error: 'Database error' }, { status: 500 });
     }
 
+    if (!existingReport) {
+      return NextResponse.json({ 
+        error: 'Report not finalized', 
+        code: 'REPORT_NOT_FINALIZED' 
+      }, { status: 409 });
+    }
+
+    console.log(`[REPORT FETCH] Report retrieved from database for session: ${id}`);
+    
+    // Add version and generatedAt to the response payload wrapper
     return NextResponse.json({
-      score: report.overall_score || 0,
-      categories: {
-        problem_solving: report.overall_score || 0,
-        systems_thinking: report.overall_score || 0,
-        technical_depth: report.overall_score || 0,
-        communication: report.overall_score || 0
-      },
-      evidence: {
-        strengths: [
-          report.summary || "Completed interview."
-        ],
-        gaps: [
-          report.decision_trace?.verdict || "Needs review."
-        ]
-      },
-      next_steps: [
-        "Review areas of improvement highlighted in feedback.",
-        "Practice communicating edge cases."
-      ],
-      decision_trace: [
-        { turn: 1, signal: "Interview Completed", weight: 1.0 }
-      ]
+      ...existingReport.report,
+      _meta: {
+        generatedAt: existingReport.finalized_at,
+        version: 1
+      }
     });
 
-  } catch (error: any) {
-    console.error(error);
-    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+  } catch (err: any) {
+    console.error(err);
+    return NextResponse.json({ error: 'Failed to fetch report', details: err.message }, { status: 500 });
   }
 }

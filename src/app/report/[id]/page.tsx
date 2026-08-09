@@ -2,29 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { Navbar } from "@/components/ui/Navbar";
-import { Footer } from "@/components/ui/Footer";
 import { apiClient } from "@/lib/api-client";
-import { InterviewReport } from "@/lib/types";
-
-// Helper to render blocky progress bars
-function BlockyProgress({ percent, length = 20 }: { percent: number, length?: number }) {
-  const filledBlocks = Math.round((percent / 100) * length);
-  const emptyBlocks = length - filledBlocks;
-  return (
-    <span className="font-mono text-sm tracking-widest text-[var(--color-primary)]">
-      {'█'.repeat(Math.max(0, filledBlocks))}
-      <span className="text-[var(--color-muted-foreground)]">
-        {'░'.repeat(Math.max(0, emptyBlocks))}
-      </span>
-    </span>
-  );
-}
 
 export default function ReportPage() {
   const params = useParams();
   const id = params.id as string;
-  const [report, setReport] = useState<InterviewReport | null>(null);
+  const [report, setReport] = useState<any>(null);
 
   useEffect(() => {
     apiClient.getReport(id).then(setReport).catch(console.error);
@@ -32,146 +15,312 @@ export default function ReportPage() {
 
   if (!report) {
     return (
-      <div className="min-h-screen flex flex-col font-sans">
-        <Navbar />
-        <main className="flex-1 flex items-center justify-center bg-[var(--color-background)]">
-          <p className="animate-pulse text-[var(--color-muted-foreground)] uppercase tracking-widest font-bold text-xs">Generating engineering profile...</p>
-        </main>
-        <Footer />
+      <div className="flex h-screen w-full items-center justify-center bg-[#FAFAFA]">
+        <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-400 animate-pulse">
+          Generating intelligence dossier...
+        </div>
       </div>
     );
   }
 
-  const verdictText = (report.score ?? 0) > 80 ? "STRONG HIRE" : (report.score ?? 0) > 65 ? "HIRE" : (report.score ?? 0) > 50 ? "BORDERLINE" : "NEEDS DEVELOPMENT";
+  const score = report.score ?? 0;
+  const verdict = report.verdict || "PENDING";
+  const summary = report.summary || "Assessment complete.";
+
+  // Aggregate all evidence for the evidence log
+  const allEvidence: { turn: number, claim: string, demonstrated: boolean, competency: string }[] = [];
+  report.evidence?.strengths?.forEach((s: any) => {
+    s.evidence?.forEach((e: any) => allEvidence.push({ ...e, demonstrated: true, competency: s.competency }));
+  });
+  report.evidence?.gaps?.forEach((g: any) => {
+    g.evidence?.forEach((e: any) => allEvidence.push({ ...e, demonstrated: false, competency: g.competency }));
+  });
+  
+  // Sort evidence by turn number
+  allEvidence.sort((a, b) => a.turn - b.turn);
+
+  // Competency Map rendering
+  const competencies = report.rawCompetencies ? Object.entries(report.rawCompetencies) : [];
 
   return (
-    <div className="min-h-screen flex flex-col font-sans bg-[#FAFAFA] dark:bg-[#0A0A0A]">
-      <Navbar />
-      <main className="flex-1 py-12 px-6">
-        <div className="mx-auto w-full max-w-2xl bg-white dark:bg-[#111] p-10 sm:p-16 shadow-[0_0_40px_rgba(0,0,0,0.03)] border border-[var(--color-border)] relative">
-          
-          {/* Header */}
-          <div className="flex flex-col mb-12">
-            <span className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--color-primary)] mb-1">INTERVU</span>
-            <h1 className="text-2xl font-black uppercase tracking-wide text-[var(--color-foreground)]">Technical Assessment Report</h1>
-            <div className="mt-8 flex flex-col">
-              <span className="text-xs font-bold uppercase tracking-widest text-[var(--color-muted-foreground)] mb-1">Candidate</span>
-              <span className="text-xl font-medium text-[var(--color-foreground)]">{id}</span> {/* Using ID temporarily if name isn't fetched */}
-            </div>
+    <div className="min-h-screen bg-[#FAFAFA] text-neutral-900 font-sans selection:bg-neutral-200 py-16 px-8">
+      <div className="max-w-4xl mx-auto bg-white border border-neutral-200 p-12 md:p-20 shadow-sm">
+        
+        {/* Dossier Header */}
+        <header className="mb-16">
+          <div className="text-[10px] font-bold tracking-[0.2em] uppercase text-emerald-600 mb-2">
+            INTERVU
           </div>
+          <h1 className="text-3xl md:text-4xl font-medium tracking-tight text-neutral-900 mb-12">
+            TECHNICAL ASSESSMENT DOSSIER
+          </h1>
 
-          <hr className="border-t-[3px] border-[var(--color-foreground)] mb-12 opacity-90" />
-
-          {/* OVERALL ASSESSMENT */}
-          <div className="flex flex-col items-center justify-center mb-12 space-y-3">
-            <span className="text-xs font-bold uppercase tracking-[0.25em] text-[var(--color-muted-foreground)]">Overall Assessment</span>
-            <span className="text-7xl font-black font-heading tracking-tighter text-[var(--color-foreground)]">{report.score ?? 0}</span>
-            <span className="text-sm font-bold uppercase tracking-[0.3em] text-[var(--color-primary)] bg-[var(--color-primary)]/10 px-4 py-1 rounded-sm">
-              {verdictText}
-            </span>
-          </div>
-
-          <hr className="border-t-[3px] border-[var(--color-foreground)] mb-12 opacity-90" />
-
-          {/* Strengths & Weaknesses Bars */}
-          <div className="flex flex-col gap-8 mb-12">
-            <div className="flex flex-col gap-2">
-              <span className="text-xs font-bold uppercase tracking-widest text-[var(--color-foreground)]">Technical Strengths</span>
-              <BlockyProgress percent={(report.score || 0) + 5 > 100 ? 100 : (report.score || 0) + 5} />
-            </div>
-            <div className="flex flex-col gap-2">
-              <span className="text-xs font-bold uppercase tracking-widest text-[var(--color-foreground)]">Areas to Develop</span>
-              <BlockyProgress percent={100 - (report.score || 0)} />
-            </div>
-          </div>
-
-          <hr className="border-t-[3px] border-[var(--color-foreground)] mb-12 opacity-90" />
-
-          {/* Assessment Breakdown */}
-          {report.categories && (
-            <>
-              <div className="mb-12">
-                <span className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--color-muted-foreground)] block mb-6">Assessment Breakdown</span>
-                <div className="flex flex-col gap-4 font-mono text-sm">
-                  <div className="flex justify-between border-b border-[var(--color-border)] border-dashed pb-2">
-                    <span className="text-[var(--color-foreground)]">Problem Solving</span>
-                    <span className="font-bold">{report.categories.problem_solving ?? 'N/A'}</span>
-                  </div>
-                  <div className="flex justify-between border-b border-[var(--color-border)] border-dashed pb-2">
-                    <span className="text-[var(--color-foreground)]">Systems Thinking</span>
-                    <span className="font-bold">{report.categories.systems_thinking ?? 'N/A'}</span>
-                  </div>
-                  <div className="flex justify-between border-b border-[var(--color-border)] border-dashed pb-2">
-                    <span className="text-[var(--color-foreground)]">Technical Depth</span>
-                    <span className="font-bold">{report.categories.technical_depth ?? 'N/A'}</span>
-                  </div>
-                  <div className="flex justify-between border-b border-[var(--color-border)] border-dashed pb-2">
-                    <span className="text-[var(--color-foreground)]">Communication</span>
-                    <span className="font-bold">{report.categories.communication ?? 'N/A'}</span>
-                  </div>
+          <div className="flex flex-col md:flex-row justify-between items-start border-t border-b border-neutral-200 py-6">
+            <div className="flex flex-col gap-4">
+              <div>
+                <div className="text-[10px] font-bold tracking-[0.2em] uppercase text-neutral-400 mb-1">
+                  Candidate
+                </div>
+                <div className="text-sm font-mono text-neutral-900">
+                  {id.substring(0,8).toUpperCase()}
                 </div>
               </div>
-              <hr className="border-t-[3px] border-[var(--color-foreground)] mb-12 opacity-90" />
-            </>
-          )}
-
-          {/* INTERVIEW INSIGHTS */}
-          <div className="mb-16">
-            <span className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--color-muted-foreground)] block mb-8">Interview Insights</span>
+              <div>
+                <div className="text-[10px] font-bold tracking-[0.2em] uppercase text-neutral-400 mb-1">
+                  Assessment ID
+                </div>
+                <div className="text-sm font-mono text-neutral-900">
+                  {id}
+                </div>
+              </div>
+            </div>
             
-            <div className="space-y-10">
-              {report.evidence?.strengths && report.evidence.strengths.length > 0 && (
-                <div>
-                  <h3 className="text-sm font-bold uppercase tracking-widest text-[var(--color-foreground)] mb-4">What they demonstrated</h3>
-                  <ul className="space-y-2 list-none pl-0 text-sm leading-relaxed text-[var(--color-muted-foreground)]">
-                    {report.evidence.strengths.map((str, idx) => (
-                      <li key={idx} className="flex gap-3">
-                        <span className="text-[var(--color-primary)]">›</span> {str}
-                      </li>
-                    ))}
-                  </ul>
+            <div className="mt-8 md:mt-0 flex flex-col gap-4">
+              <div>
+                <div className="text-[10px] font-bold tracking-[0.2em] uppercase text-neutral-400 mb-1">
+                  Competencies Assessed
                 </div>
-              )}
+                <div className="text-sm font-mono text-neutral-900">
+                  {competencies.length}
+                </div>
+              </div>
+              <div>
+                <div className="text-[10px] font-bold tracking-[0.2em] uppercase text-neutral-400 mb-1">
+                  Evidence Collected
+                </div>
+                <div className="text-sm font-mono text-neutral-900">
+                  {allEvidence.length}
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
 
-              {report.evidence?.gaps && report.evidence.gaps.length > 0 && (
-                <div>
-                  <h3 className="text-sm font-bold uppercase tracking-widest text-[var(--color-foreground)] mb-4">Where they struggled</h3>
-                  <ul className="space-y-2 list-none pl-0 text-sm leading-relaxed text-[var(--color-muted-foreground)]">
-                    {report.evidence.gaps.map((gap, idx) => (
-                      <li key={idx} className="flex gap-3">
-                        <span className="text-red-500">›</span> {gap}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+        {/* Hero Verdict */}
+        <div className="mb-20 text-center">
+          <div className="text-[10px] font-bold tracking-[0.2em] uppercase text-neutral-400 mb-6">
+            OVERALL ASSESSMENT
+          </div>
+          <div className="text-[80px] leading-none font-medium tracking-tighter text-neutral-900 mb-4">
+            {score}
+          </div>
+          <div className="text-lg font-bold tracking-[0.2em] uppercase text-neutral-900 mb-6">
+            {verdict}
+          </div>
+          <div className="text-xl text-neutral-700 italic max-w-2xl mx-auto">
+            "{summary}"
+          </div>
+        </div>
 
-              {report.next_steps && report.next_steps.length > 0 && (
-                <div>
-                  <h3 className="text-sm font-bold uppercase tracking-widest text-[var(--color-foreground)] mb-4">Recommended next steps</h3>
-                  <ul className="space-y-2 list-none pl-0 text-sm leading-relaxed text-[var(--color-foreground)]">
-                    {report.next_steps.map((step, idx) => (
-                      <li key={idx} className="flex gap-3">
-                        <span className="font-mono text-xs opacity-50 mt-0.5">{String(idx + 1).padStart(2, '0')}</span> {step}
-                      </li>
-                    ))}
-                  </ul>
+        {/* Competency Map */}
+        {competencies.length > 0 && (
+          <div className="mb-20">
+            <div className="text-[11px] font-bold tracking-[0.2em] uppercase text-neutral-900 mb-4">
+              COMPETENCY MAP
+            </div>
+            <hr className="border-neutral-200 mb-8" />
+            <div className="space-y-6 font-mono text-sm">
+              {competencies.map(([name, data]: [string, any], idx) => (
+                <div key={idx} className="flex justify-between items-center border-b border-neutral-100 pb-4">
+                  <div className="w-1/3 text-neutral-900 font-bold">{name}</div>
+                  <div className="w-2/3 flex justify-end gap-6 text-xs text-neutral-500">
+                    <div className="flex flex-col items-end">
+                      <span className="uppercase text-[9px] tracking-widest mb-1">Correctness</span>
+                      <span className="text-neutral-900">{(data.conceptualUnderstanding * 100).toFixed(0)}</span>
+                    </div>
+                    <div className="flex flex-col items-end">
+                      <span className="uppercase text-[9px] tracking-widest mb-1">Depth</span>
+                      <span className="text-neutral-900">{(data.reasoningAbility * 100).toFixed(0)}</span>
+                    </div>
+                    <div className="flex flex-col items-end">
+                      <span className="uppercase text-[9px] tracking-widest mb-1">Application</span>
+                      <span className="text-neutral-900">{(data.applicationAbility * 100).toFixed(0)}</span>
+                    </div>
+                    <div className="flex flex-col items-end">
+                      <span className="uppercase text-[9px] tracking-widest mb-1">Uncertainty</span>
+                      <span className="text-neutral-900">{(data.uncertainty * 100).toFixed(0)}</span>
+                    </div>
+                  </div>
                 </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Strengths & Gaps */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-20">
+          <div>
+            <div className="text-[11px] font-bold tracking-[0.2em] uppercase text-neutral-900 mb-4">
+              WHAT THE CANDIDATE DEMONSTRATED
+            </div>
+            <hr className="border-neutral-200 mb-6" />
+            <div className="space-y-8">
+              {report.evidence?.strengths?.map((str: any, idx: number) => (
+                <div key={idx}>
+                  <div className="flex gap-3 mb-2">
+                    <span className="text-emerald-500 font-bold mt-[2px]">✓</span>
+                    <div className="text-[14px] font-medium leading-relaxed text-neutral-900">
+                      {str.conclusion}
+                    </div>
+                  </div>
+                  <div className="pl-7 space-y-3">
+                    {str.evidence?.map((ev: any, i: number) => (
+                      <div key={i} className="text-xs text-neutral-600 bg-neutral-50 p-3 border border-neutral-100 font-mono">
+                        <span className="font-bold text-neutral-900 block mb-1">TURN {ev.turn}</span>
+                        {ev.claim}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+              {(!report.evidence?.strengths || report.evidence.strengths.length === 0) && (
+                <div className="text-[13px] text-neutral-400 font-mono">None identified.</div>
               )}
             </div>
           </div>
 
-          <hr className="border-t-[3px] border-[var(--color-foreground)] mb-8 opacity-90" />
-
-          {/* Footer branding */}
-          <div className="flex flex-col items-center justify-center opacity-50">
-            <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-[var(--color-foreground)] mb-1">INTERVU</span>
-            <span className="text-[10px] tracking-widest uppercase font-mono">Assessment completed</span>
+          <div>
+            <div className="text-[11px] font-bold tracking-[0.2em] uppercase text-neutral-900 mb-4">
+              WHERE UNCERTAINTY REMAINED
+            </div>
+            <hr className="border-neutral-200 mb-6" />
+            <div className="space-y-8">
+              {report.evidence?.gaps?.map((gap: any, idx: number) => (
+                <div key={idx}>
+                  <div className="flex gap-3 mb-2">
+                    <span className="text-amber-500 font-bold mt-[2px]">△</span>
+                    <div className="text-[14px] font-medium leading-relaxed text-neutral-900">
+                      {gap.conclusion}
+                    </div>
+                  </div>
+                  <div className="pl-7 space-y-3">
+                    {gap.evidence?.map((ev: any, i: number) => (
+                      <div key={i} className="text-xs text-neutral-600 bg-neutral-50 p-3 border border-neutral-100 font-mono">
+                        <span className="font-bold text-neutral-900 block mb-1">TURN {ev.turn}</span>
+                        {ev.claim}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+              {(!report.evidence?.gaps || report.evidence.gaps.length === 0) && (
+                <div className="text-[13px] text-neutral-400 font-mono">No significant uncertainty remaining.</div>
+              )}
+            </div>
           </div>
-
         </div>
-      </main>
-      <Footer />
+
+        {/* Adaptation Timeline */}
+        <div className="mb-20">
+          <div className="text-[11px] font-bold tracking-[0.2em] uppercase text-neutral-900 mb-4">
+            ADAPTATION TIMELINE
+          </div>
+          <hr className="border-neutral-200 mb-8" />
+          
+          <div className="flex flex-col items-center font-mono text-[11px] space-y-4">
+            {report.trajectory?.map((t: any, idx: number) => (
+              <div key={idx} className="flex flex-col items-center w-full max-w-sm">
+                <div className="bg-neutral-50 p-4 border border-neutral-200 w-full text-center">
+                  <div className="text-[9px] uppercase tracking-widest text-neutral-500 mb-1">
+                    TURN {idx + 1} {t.fingerprint?.competency ? `• ${t.fingerprint.competency}` : ''}
+                  </div>
+                  <div className="font-bold text-neutral-900 mb-2">
+                    {t.strategy}
+                  </div>
+                  <div className="text-neutral-600 lowercase text-xs leading-relaxed font-sans">
+                    {t.decision}
+                  </div>
+                </div>
+                {idx < report.trajectory!.length - 1 && (
+                  <div className="text-neutral-300 my-2">↓</div>
+                )}
+              </div>
+            ))}
+            <div className="flex flex-col items-center w-full max-w-sm">
+              <div className="text-neutral-300 my-2">↓</div>
+              <div className="bg-neutral-900 text-white px-4 py-3 border border-neutral-900 font-bold w-full text-center">
+                CONCLUDE
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Evidence Log */}
+        <div className="mb-20">
+          <div className="text-[11px] font-bold tracking-[0.2em] uppercase text-neutral-900 mb-4">
+            EVIDENCE LOG
+          </div>
+          <hr className="border-neutral-200 mb-0" />
+          <div className="w-full">
+            <div className="flex py-3 border-b border-neutral-200 text-[10px] font-bold tracking-[0.2em] uppercase text-neutral-400">
+              <div className="w-16">TURN</div>
+              <div className="w-1/3">TARGET</div>
+              <div className="w-1/2">OBSERVATION</div>
+              <div className="w-16 text-right">IMPACT</div>
+            </div>
+            {allEvidence.map((ev, idx) => (
+              <div key={idx} className="flex py-4 border-b border-neutral-100 text-sm">
+                <div className="w-16 font-mono text-neutral-500">{ev.turn}</div>
+                <div className="w-1/3 font-medium text-neutral-900 pr-4">{ev.competency}</div>
+                <div className="w-1/2 text-neutral-700 leading-relaxed pr-4">
+                  <span className={ev.demonstrated ? "text-emerald-500 font-bold mr-2" : "text-amber-500 font-bold mr-2"}>
+                    {ev.demonstrated ? "✓" : "△"}
+                  </span>
+                  {ev.claim}
+                </div>
+                <div className="w-16 text-right font-bold">
+                  {ev.demonstrated ? (
+                    <span className="text-emerald-600">Conf ↑</span>
+                  ) : (
+                    <span className="text-amber-600">Unc ↑</span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Final Recommendation */}
+        {report.final_recommendation && (
+          <div className="bg-neutral-50 border border-neutral-200 p-8">
+            <div className="text-[11px] font-bold tracking-[0.2em] uppercase text-neutral-900 mb-6">
+              FINAL RECOMMENDATION
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div>
+                <div className="text-[10px] font-bold tracking-[0.2em] uppercase text-neutral-500 mb-2">
+                  STRONGEST SIGNAL
+                </div>
+                <div className="text-sm text-neutral-900 font-medium">
+                  {report.final_recommendation.strongest_signal}
+                </div>
+              </div>
+              
+              <div>
+                <div className="text-[10px] font-bold tracking-[0.2em] uppercase text-neutral-500 mb-2">
+                  BIGGEST RISK
+                </div>
+                <div className="text-sm text-neutral-900 font-medium">
+                  {report.final_recommendation.biggest_risk}
+                </div>
+              </div>
+            </div>
+
+            <hr className="border-neutral-200 my-6" />
+
+            <div>
+              <div className="text-[10px] font-bold tracking-[0.2em] uppercase text-neutral-500 mb-2">
+                RECOMMENDED NEXT STEP
+              </div>
+              <div className="text-sm text-neutral-900 font-medium bg-white p-4 border border-neutral-200">
+                {report.final_recommendation.recommended_next_step}
+              </div>
+            </div>
+          </div>
+        )}
+
+      </div>
     </div>
   );
 }

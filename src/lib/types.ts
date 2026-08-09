@@ -7,6 +7,12 @@ export interface Candidate {
   avatarUrl?: string;
 }
 
+export interface InterviewSession {
+  id: string;
+  candidateId: string;
+  status: "INITIALIZING" | "ACTIVE" | "COMPLETED" | "ERROR";
+}
+
 export interface CurriculumTopic {
   id: string;
   day_id: string;
@@ -20,6 +26,22 @@ export interface InterviewTurn {
   question: string;
   topic: string;
   turn_number?: number;
+  telemetry?: {
+    knowledgeState: {
+      competencies: Record<string, any>;
+      uncertainty: number;
+      trajectory: any[];
+    };
+    decision: {
+      turn: number;
+      strategy: string;
+      targetCompetency: string;
+      rationale: string;
+      whyNow: string;
+      expectedEvidence: string[];
+      nextDifficulty: number;
+    };
+  };
 }
 
 export interface StartInterviewResponse {
@@ -46,9 +68,20 @@ export interface ReportCategoryScores {
   communication: number;
 }
 
+export interface EvidenceCitation {
+  turn: number;
+  claim: string;
+  demonstrated: boolean;
+}
+
+export interface StructuredEvidence {
+  conclusion: string;
+  evidence: EvidenceCitation[];
+}
+
 export interface ReportEvidence {
-  strengths: string[];
-  gaps: string[];
+  strengths: StructuredEvidence[];
+  gaps: StructuredEvidence[];
 }
 
 export interface InterviewReport {
@@ -56,5 +89,5 @@ export interface InterviewReport {
   categories: ReportCategoryScores;
   evidence: ReportEvidence;
   next_steps: string[];
-  decision_trace: unknown[];
+  trajectory?: { strategy: string; rationale: string }[];
 }
