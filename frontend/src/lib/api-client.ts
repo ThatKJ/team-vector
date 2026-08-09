@@ -117,13 +117,27 @@ const DEMO_DOSSIER: InterviewReport = {
 };
 
 class ApiClient {
-  private baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3001/api";
+  // NEXT_PUBLIC_* values are inlined at build time. An empty/missing value must
+  // NEVER fall back to a localhost URL in a production bundle — the browser would
+  // request a local-network address (Chrome blocks this and prompts "Access other
+  // apps and services on this device"). In production, fall back to the
+  // same-origin "/api" path, which Vercel proxies to the backend service.
+  private baseUrl =
+    (process.env.NEXT_PUBLIC_API_BASE_URL || "").trim() ||
+    (process.env.NODE_ENV === "production"
+      ? "/api"
+      : "http://localhost:3001/api");
   private useMock = process.env.NEXT_PUBLIC_USE_MOCK === "true";
 
   async getCandidates(): Promise<Candidate[]> {
-    const res = await fetch(`${this.baseUrl}/candidates`);
-    if (!res.ok) throw new Error("Failed to fetch candidates");
-    return res.json();
+    try {
+      const res = await fetch(`${this.baseUrl}/candidates`);
+      if (!res.ok) throw new Error(`Unable to load candidates (HTTP ${res.status})`);
+      return res.json();
+    } catch (err) {
+      console.error("[api] getCandidates failed:", err);
+      throw new Error("Unable to load candidates. Please try again.");
+    }
   }
 
   async startInterview(sessionId: string, candidateId?: string | null): Promise<StartInterviewResponse> {
